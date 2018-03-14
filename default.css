@@ -1,3 +1,7 @@
+#both_canvases {
+  position: relative;
+}
+
 canvas {
   position:absolute;
 }
