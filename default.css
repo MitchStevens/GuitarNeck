@@ -1,5 +1,6 @@
 #both_canvases {
   position: relative;
+  height: 150px;
 }
 
 canvas {

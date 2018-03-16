@@ -23,5 +23,5 @@ main :: Eff (HA.HalogenEffects (canvas :: CANVAS)) Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
   io <- runUI guitar_neck unit body
-  io.query (PaintNeck unit)
+  io.query (PaintNeck initial_neck_data unit)
   io.query (SetChord test_chord unit)
