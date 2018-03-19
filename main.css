@@ -1,0 +1,140 @@
+h1 {
+  alignment: center;
+  font-size: 60px;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Cambria Math", sans-serif;
+  margin: 0;
+}
+h2,
+h3 {
+  color: #336699;
+}
+h4 {
+  display: inline;
+}
+h6 {
+  margin: 2px;
+  text-decoration: none;
+  font-weight: lighter;
+  text-align: center;
+}
+.indent {
+  margin-left: 20px;
+}
+body {
+  background-color: #BBBBBB;
+}
+table,
+td {
+  font-family: "Cambria Math", sans-serif;
+  border: 1px solid black;
+  margin: 0 auto;
+}
+th,
+td {
+  padding: 3px;
+}
+table th {
+  color: white;
+  background-color: #336699;
+}
+hr {
+  border: 0;
+  height: 1px;
+  background: #333;
+  background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+.image {
+  width: 80%;
+  display: block;
+  margin: 0 auto;
+  padding: 10px;
+  border: 1px groove;
+}
+.image img {
+  width: 100%;
+}
+#header .before {
+  height: 100px;
+  transition-duration: 200ms;
+}
+#header {
+  width: 100%;
+  height: 200px;
+  display: block;
+  background-color: #336699;
+  border-radius: 30px 30px 0 0;
+}
+#header * {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 40px 0 40px;
+}
+#header h1 {
+  float: left;
+}
+#mitch_stevens {
+  float: right;
+  width: 150px;
+}
+#center-region {
+  font-size: 20px;
+  max-width: 950px;
+  margin: 0 auto;
+  font-family: "Calibri", sans-serif;
+  font-weight: lighter;
+  background-color: white;
+  border-radius: 0 0 30px 30px;
+}
+#content {
+  margin: 50px;
+}
+#bg {
+  background-color: #BBBBBB;
+}
+#sidebar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: #BBBBBB;
+  padding: 10px;
+}
+#sidebar img {
+  width: 75px;
+}
+a:link,
+a:visited,
+a:hover,
+a:active {
+  color: #336699;
+  text-decoration: none;
+  font-weight: bolder;
+}
+.hideme {
+  display: none;
+}
+pre {
+  margin: auto 0;
+  width: 80%;
+}
+code {
+  font-size: 16px;
+}
+#paper_container {
+  display: flex;
+  justify-content: space-around;
+  border-spacing: 10px;
+  flex-wrap: wrap;
+}
+.paper {
+  flex-grow: 2;
+  border: 1px solid black;
+  margin-top: 10px;
+  padding: 5px;
+  width: 300px;
+}

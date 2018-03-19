@@ -1,27 +1,36 @@
 module Main where
 
+import Data.Maybe
+import Data.Tuple
+import Fret
 import Graphics.Canvas
-import GuitarNeck
-import Chord
+import Node.FS
 import Prelude
 
-import Data.Tuple
+import UI.GuitarNeck
 
+import DOM (DOM)
+import DOM.HTML.Types
+import DOM.Node.ParentNode (QuerySelector(..), querySelector)
+import Control.Monad.Aff
 import Control.Monad.Eff (Eff)
+import Halogen.Aff (awaitLoad)
 import Halogen.Aff as HA
+import Halogen.Aff.Util
 import Halogen.HTML.Properties as H
 import Halogen.VDom.Driver (runUI)
+import Network.HTTP.Affjax
 
-test_chord =
-  [ Tuple B3 5
-  , Tuple G3 5
-  , Tuple D3 5
-  , Tuple A2 3
-  ]
+default_neck_data = {width: 600.0, height: 120.0, num_frets: 15}
 
-main :: Eff (HA.HalogenEffects (canvas :: CANVAS)) Unit
-main = HA.runHalogenAff do
-  body <- HA.awaitBody
-  io <- runUI guitar_neck unit body
-  io.query (PaintNeck initial_neck_data unit)
-  io.query (SetChord test_chord unit)
+main :: forall e. Eff (HA.HalogenEffects (ajax :: AJAX, fs :: FS, canvas :: CANVAS | e)) Unit
+main = void $ HA.runHalogenAff do
+  body <- await_guitar
+  io <- runUI (guitar_neck default_neck_data) unit body
+  io.query (PaintNeck unit)
+
+await_guitar :: forall e. Aff (dom :: DOM | e) HTMLElement
+await_guitar = do
+  awaitLoad
+  element <- selectElement (QuerySelector "#content #guitar")
+  maybe (throwError (error "Could not find element")) pure element

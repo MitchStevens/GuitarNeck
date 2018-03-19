@@ -1,8 +1,20 @@
-#both_canvases {
+#both-canvases {
   position: relative;
   height: 150px;
 }
 
 canvas {
   position:absolute;
+}
+
+#chord-display .root {
+  color: red;
+}
+
+#chord-display .mode {
+  color: blue;
+}
+
+#chord-display .extension {
+  color: green;
 }
