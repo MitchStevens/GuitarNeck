@@ -60,6 +60,8 @@ instance foldable_chord :: Foldable ChordF where
 type Fingering = ChordF (Maybe Fret)
 instance show_chord :: Show (ChordF (Maybe Fret)) where
   show chord = intercalate "-" $ map (maybe "x" show) chord
+instance transpose_chord :: Transpose (ChordF (Maybe Fret)) where
+  trans n = 
 
 to_array :: ChordF ~> Array
 to_array (Fingering c) = [c.e4, c.b3, c.g3, c.d3, c.a2, c.e2]
