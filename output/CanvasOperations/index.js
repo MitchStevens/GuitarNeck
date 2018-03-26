@@ -3,6 +3,7 @@
 var Control_Apply = require("../Control.Apply");
 var Control_Bind = require("../Control.Bind");
 var Control_Monad_Eff = require("../Control.Monad.Eff");
+var DOM_Event_MouseEvent = require("../DOM.Event.MouseEvent");
 var Data_Array = require("../Data.Array");
 var Data_EuclideanRing = require("../Data.EuclideanRing");
 var Data_Foldable = require("../Data.Foldable");
@@ -27,8 +28,8 @@ var Prelude = require("../Prelude");
 var wipe_neck = Data_Functor["void"](Control_Monad_Eff.functorEff)(function __do() {
     var v = Graphics_Canvas.getCanvasElementById("guitar_notes")();
     var __unused = function (dictPartial1) {
-        return function ($dollar17) {
-            return $dollar17;
+        return function ($dollar20) {
+            return $dollar20;
         };
     };
     return __unused()((function () {
@@ -44,7 +45,7 @@ var wipe_neck = Data_Functor["void"](Control_Monad_Eff.functorEff)(function __do
                 })();
             };
         };
-        throw new Error("Failed pattern match at CanvasOperations line 115, column 3 - line 116, column 3: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at CanvasOperations line 138, column 3 - line 139, column 3: " + [ v.constructor.name ]);
     })())();
 });
 var string_color = "#dddddd";
@@ -117,8 +118,8 @@ var paint_neck = function (neck) {
     return Data_Functor["void"](Control_Monad_Eff.functorEff)(function __do() {
         var v = Graphics_Canvas.getCanvasElementById("guitar_neck")();
         var __unused = function (dictPartial1) {
-            return function ($dollar21) {
-                return $dollar21;
+            return function ($dollar24) {
+                return $dollar24;
             };
         };
         return __unused()((function () {
@@ -134,16 +135,48 @@ var paint_neck = function (neck) {
                     })))(Data_Foldable.traverse_(Control_Monad_Eff.applicativeEff)(Data_Foldable.foldableArray)(paint_fret(tuple))(Data_Array.range(0)(neck.num_frets))))(paint_inlays(tuple)))(paint_strings(tuple)))(Data_Foldable.traverse_(Control_Monad_Eff.applicativeEff)(Data_Foldable.foldableArray)(paint_number(tuple))(Data_Array.range(1)(neck.num_frets)))();
                 };
             };
-            throw new Error("Failed pattern match at CanvasOperations line 34, column 3 - line 35, column 3: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at CanvasOperations line 38, column 3 - line 39, column 3: " + [ v.constructor.name ]);
         })())();
     });
 };
 var chord_color = "#ee1122";
+var paint_centeroids = function (dictFoldable) {
+    return function (neck) {
+        return function (points) {
+            var paint_single = function (ctx) {
+                return function (v) {
+                    return Data_Functor["void"](Control_Monad_Eff.functorEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Graphics_Canvas.beginPath(ctx))(Data_Function.flip(Graphics_Canvas.arc)(circle({
+                        x: v.x,
+                        y: v.y,
+                        r: 18.0
+                    }))))(Graphics_Canvas.fill));
+                };
+            };
+            return Data_Functor["void"](Control_Monad_Eff.functorEff)(function __do() {
+                var v = Graphics_Canvas.getCanvasElementById("guitar_notes")();
+                var __unused = function (dictPartial1) {
+                    return function ($dollar28) {
+                        return $dollar28;
+                    };
+                };
+                return __unused()((function () {
+                    if (v instanceof Data_Maybe.Just) {
+                        return function __do() {
+                            var v1 = Graphics_Canvas.getContext2D(v.value0)();
+                            return Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Graphics_Canvas.setGlobalAlpha(v1)(0.35))(Graphics_Canvas.setFillStyle(chord_color)(v1)))(Data_Foldable.traverse_(Control_Monad_Eff.applicativeEff)(dictFoldable)(paint_single(v1))(points)))(Graphics_Canvas.setGlobalAlpha(v1)(1.0))();
+                        };
+                    };
+                    throw new Error("Failed pattern match at CanvasOperations line 119, column 3 - line 120, column 3: " + [ v.constructor.name ]);
+                })())();
+            });
+        };
+    };
+};
 var paint_chord = function (neck) {
     return function (fingering) {
         var paint_fingering = function (ctx) {
             return function (v) {
-                return Data_Functor["void"](Control_Monad_Eff.functorEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Graphics_Canvas.setFillStyle(chord_color)(ctx))(Graphics_Canvas.beginPath))(Data_Function.flip(Graphics_Canvas.arc)(circle({
+                return Data_Functor["void"](Control_Monad_Eff.functorEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Graphics_Canvas.beginPath(ctx))(Data_Function.flip(Graphics_Canvas.arc)(circle({
                     x: v.x,
                     y: v.y,
                     r: 8.5
@@ -153,18 +186,18 @@ var paint_chord = function (neck) {
         return Data_Functor["void"](Control_Monad_Eff.functorEff)(function __do() {
             var v = Graphics_Canvas.getCanvasElementById("guitar_notes")();
             var __unused = function (dictPartial1) {
-                return function ($dollar25) {
-                    return $dollar25;
+                return function ($dollar33) {
+                    return $dollar33;
                 };
             };
             return __unused()((function () {
                 if (v instanceof Data_Maybe.Just) {
                     return function __do() {
                         var v1 = Graphics_Canvas.getContext2D(v.value0)();
-                        return Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Graphics_Canvas.setGlobalAlpha(v1)(0.35))(Data_Foldable.traverse_(Control_Monad_Eff.applicativeEff)(Data_Foldable.foldableArray)(paint_fingering(v1))(Fingering.to_points(neck)(fingering))))(Graphics_Canvas.setGlobalAlpha(v1)(1.0))();
+                        return Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Control_Apply.applySecond(Control_Monad_Eff.applyEff)(Graphics_Canvas.setGlobalAlpha(v1)(0.35))(Graphics_Canvas.setFillStyle(chord_color)(v1)))(Data_Foldable.traverse_(Control_Monad_Eff.applicativeEff)(Data_Foldable.foldableArray)(paint_fingering(v1))(Fingering.to_points(neck)(fingering))))(Graphics_Canvas.setGlobalAlpha(v1)(1.0))();
                     };
                 };
-                throw new Error("Failed pattern match at CanvasOperations line 98, column 3 - line 99, column 3: " + [ v.constructor.name ]);
+                throw new Error("Failed pattern match at CanvasOperations line 102, column 3 - line 103, column 3: " + [ v.constructor.name ]);
             })())();
         });
     };
@@ -172,5 +205,6 @@ var paint_chord = function (neck) {
 module.exports = {
     paint_neck: paint_neck,
     paint_chord: paint_chord,
+    paint_centeroids: paint_centeroids,
     wipe_neck: wipe_neck
 };

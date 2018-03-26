@@ -1,47 +1,47 @@
 module UI.GuitarNeck where
 
-import CanvasOperations
-import Fingering
-import Debug.Trace
-import Fret
-import Music
-import NeckData
-import Prelude
-import Reader
-import Math (pow, pi)
-
 import Control.Apply (lift2)
-import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.AVar
 import Control.Monad.Eff
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Ref
+import Control.Monad.Aff (Aff)
+
+import Debug.Trace
+import Fingering
+import Fret
+import Music
+import NeckData
+import Node.FS
+import CanvasOperations
+import Prelude
+import Reader
+
+import DOM
+import DOM.HTML.HTMLElement
+import DOM.HTML.Types
+import DOM.Event.MouseEvent as ME
+import DOM.Event.Types as Event
+import DOM.Node.ParentNode (QuerySelector(..))
 
 import Data.Array (length, (..), mapMaybe)
 import Data.Either
 import Data.Foldable
 import Data.Int (toNumber, ceil)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Data.Record.ShowRecord (showRecord)
 import Data.StrMap
 import Data.Tuple
 
-import Graphics.Canvas
 import Halogen (liftAff)
 import Halogen as H
 import Halogen.Aff (selectElement)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
+import Halogen.HTML.Events as He
 import Halogen.HTML.Properties as HP
-import Node.FS
-import DOM
-import DOM.HTML.Types
-import DOM.HTML.HTMLElement
-import DOM.Event.MouseEvent as ME
-import DOM.Event.Types as Event
-import DOM.Node.ParentNode (QuerySelector(..))
+import Graphics.Canvas
 import Network.HTTP.Affjax
-
+import Math (pow, pi)
 import UI.ChordInput as CI
 
 data Slot = ChordInputSlot
@@ -62,6 +62,8 @@ data Query a
   | WipeNeck a
   | ClearAll a
   | MouseMove Event.MouseEvent a
+  | MouseEnter a
+  | MouseLeave a
   | SetChord Fingering a
   | ChordInputMessage CI.Message a
 
@@ -116,7 +118,9 @@ guitar_neck neck =
             [ HP.id_ "guitar_notes"
             , HP.width  $ ceil width
             , HP.height $ ceil height
-            , HE.onMouseMove (HE.input MouseMove)
+            , HE.onMouseMove  (HE.input MouseMove)
+            , HE.onMouseEnter (HE.input_ MouseEnter)
+            , HE.onMouseLeave (HE.input_ MouseLeave)
             ]
           ]
         , HH.slot ChordInputSlot CI.chord_input unit (HE.input ChordInputMessage)
@@ -149,13 +153,20 @@ guitar_neck neck =
       case closest of
         Just c  -> eval (SetChord c.fingering next)
         Nothing -> pure next
+    MouseEnter next -> do
+      eval (WipeNeck next)
+    MouseLeave next -> do
+      state <- H.get
+      _ <- eval (WipeNeck next)
+      let (centeroids :: Array Point) = map (\x -> x.centeroid) state.curr_fingerings
+      H.liftEff (paint_centeroids state.neck_data centeroids)
+      pure next
     SetChord chord next -> do
       state <- H.get
       --if chord is different, do this stuff
       _ <- eval (WipeNeck next)
       H.liftEff (paint_chord state.neck_data chord)
-      pure next 
-    -- GetChord chord -> pure $ chord unit
+      pure next
     ChordInputMessage (CI.ChangedState message) next -> do
       state <- H.get
       new_state <- H.liftAff $ next_state message state
