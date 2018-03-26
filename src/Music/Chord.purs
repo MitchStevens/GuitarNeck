@@ -15,22 +15,20 @@ data Chord = Chord PitchClass Mode (Array Extension)
 instance eq_chord :: Eq Chord where
   eq c1 c2 = to_notes c1 `same_elements` to_notes c2
     where same_elements a b = null (a\\b) && null (b\\a)
-
 instance show_chord :: Show Chord where
-  show (Chord root mode exts) = (show root) <> mode_str <> foldMap show exts
-    where
-      mode_str = case mode of
-        Major       -> "maj"
-        Minor       -> "min"
-        Ionian      -> "maj"
-        Dorian      -> "min"
-        Phrygian    -> "min"
-        Lydian      -> "maj"
-        Mixolydian  -> if any (\ex -> degree ex == 7) exts then "dom" else "maj"
-        Aeolian     -> "min"
-        Locrian     -> "min"
-        Augmented   -> "aug"
-        Diminished  -> "dim"
+  show chord@(Chord root mode exts) = foldMap id [show root, show_quality chord,show_extensions chord]
+
+show_quality :: Chord -> String
+show_quality (Chord _ Major _) = ""
+show_quality (Chord _ Minor _) = "m"
+show_quality (Chord _ Mixolydian _) = ""
+show_quality (Chord _ Diminished []) = "dim"
+show_quality (Chord _ Augmented []) = "aug"
+show_quality (Chord _ mode _) = show mode
+
+show_extensions :: Chord -> String
+show_extensions (Chord _ _ exts) = foldMap show exts
+
 instance transpose_chord :: Transpose Chord where
   trans :: Int -> Chord -> Chord
   trans n (Chord root qual exts) = Chord (trans n root) qual exts

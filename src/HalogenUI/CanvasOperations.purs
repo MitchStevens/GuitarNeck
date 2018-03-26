@@ -4,21 +4,20 @@ module CanvasOperations (
   wipe_neck
 ) where
 
-import Prelude
-import Fret
-import ChordFingering
-import NeckData
-
+import Fingering
 import Control.Monad.Eff
-import Data.Array ((..))
-import Data.Int (toNumber)
+import Fret
+import Graphics.Canvas
+import NeckData
+import Partial.Unsafe
+import Prelude
+
 import Data.Maybe
 import Data.Traversable
 import Data.Tuple
+import Data.Array ((..), zipWith)
+import Data.Int (toNumber)
 import Math (pow, pi)
-import Partial.Unsafe
-
-import Graphics.Canvas
 
 type HexColor = String
 neck_color   = "#edc889" :: HexColor
@@ -30,54 +29,71 @@ chord_color  = "#ee1122" :: HexColor
 fret_width = 2.0 :: Number
 inlay_radius = 5.0 :: Number
 
-paint_neck :: NeckData -> forall e. Eff (canvas :: CANVAS | e) Unit
-paint_neck neck = void $ unsafePartial do
+paint_neck :: forall e. NeckData -> Eff (canvas :: CANVAS | e) Unit
+paint_neck neck = void $ unsafePartial $ do
   Just canvas <- getCanvasElementById "guitar_neck"
   ctx <- getContext2D canvas
   let num_frets = neck.num_frets
   let tuple = Tuple ctx neck
   setFillStyle neck_color ctx
-    *> fillRect ctx {x:0.0, y:0.0, w:neck.width, h:neck.height}
+    *> fillRect ctx {x:neck.x_offset, y:neck.y_offset, w:neck.width, h:neck.height}
     *> traverse_ (paint_fret tuple) (0..num_frets)
     *> paint_inlays tuple
     *> paint_strings tuple
+    *> traverse_ (paint_number tuple) (1..neck.num_frets)
 
-paint_fret :: Tuple Context2D NeckData -> Int -> forall e. Eff (canvas :: CANVAS | e) Unit
+paint_fret :: forall e. Tuple Context2D NeckData
+                     -> Int
+                     -> Eff (canvas :: CANVAS | e) Unit
 paint_fret (Tuple ctx neck) fret = void $
   setFillStyle fret_color ctx
   *> fillRect ctx
       { x: fret_x neck (toNumber fret) - (fret_width * 0.5)
-      , y: 0.0
+      , y: neck.y_offset
       , w: fret_width
       , h: neck.height }
 
-paint_inlays :: Tuple Context2D NeckData -> forall e. Eff (canvas :: CANVAS | e) Unit
+paint_inlays :: forall e. Tuple Context2D NeckData -> Eff (canvas :: CANVAS | e) Unit
 paint_inlays (Tuple ctx neck) = void $
   setFillStyle inlay_color ctx
   *> traverse_ single_inlay inlay_points
   where
     x = fret_marker neck (Fret 12)
-    y = neck.height / 6.0
-    inlay_points = [point x y, point x (y*5.0)] <>
-      map (\x -> point (fret_marker neck (Fret x)) (y*3.0)) [3, 5, 7, 9, 15, 17, 19, 21]
+    y = str_y neck
+    middle_y = y 2.5
+    inlay_points = [point x (y 0.5), point x (y 4.5)] <>
+      map (\x -> point (fret_marker neck (Fret x)) (y 2.5)) [3, 5, 7, 9, 15, 17, 19, 21]
 
     single_inlay :: Point -> forall e. Eff (canvas :: CANVAS | e) Unit
     single_inlay (Point p) = void $
       beginPath ctx >>= flip arc (circle { x: p.x, y: p.y, r: inlay_radius }) >>= fill
 
-paint_strings :: Tuple Context2D NeckData -> forall e. Eff (canvas :: CANVAS | e) Unit
-paint_strings (Tuple ctx neck) = void $
-  setFillStyle string_color ctx *> traverse_ single_string (0..5)
+paint_strings :: forall e. Tuple Context2D NeckData -> Eff (canvas :: CANVAS | e) Unit
+paint_strings (Tuple ctx neck) = 
+  setFillStyle string_color ctx
+    *> (sequence_ $ zipWith single_string (0..5) gauges)
   where
-    single_string n =
+    gauges = [0.2540, 0.3302, 0.4318, 0.6604, 0.9144, 1.1684]
+    fret_size = 50.0
+    single_string n g =
       beginPath ctx
       *> fillRect ctx
-        { x: 0.0
+        { x: neck.x_offset
         , y: str_y neck (toNumber n)
         , w: neck.width
-        , h: 1.0 }
+        , h: neck.height* g / fret_size }
 
-paint_chord :: NeckData -> ChordFingering -> forall e. Eff (canvas :: CANVAS | e) Unit
+paint_number :: Tuple Context2D NeckData -> Int -> forall e. Eff (canvas :: CANVAS | e) Unit
+paint_number (Tuple ctx neck) num = void $ do
+  _ <- setFont (show font_size <> "px Georgia") ctx
+  _ <- setFillStyle "#000000" ctx
+  { width: text_width } <- measureText ctx (show num)
+  fillText ctx (show num) (fret_marker neck (Fret num) - (text_width*0.5)) y_pos
+    where
+      font_size = 14
+      y_pos = max (toNumber font_size) (str_y neck 0.0 - neck.y_offset)
+
+paint_chord :: NeckData -> Fingering -> forall e. Eff (canvas :: CANVAS | e) Unit
 paint_chord neck fingering = void $ unsafePartial do
   Just canvas <- getCanvasElementById "guitar_notes"
   ctx <- getContext2D canvas

@@ -1,44 +1,46 @@
 module UI.GuitarNeck where
 
-import Network.HTTP.Affjax
-
 import CanvasOperations
-import ChordFingering
+import Fingering
 import Debug.Trace
 import Fret
-import Halogen.HTML
+import Music
 import NeckData
-import Node.FS
 import Prelude
 import Reader
-import Music
+import Math (pow, pi)
 
+import Control.Apply (lift2)
+import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.AVar
 import Control.Monad.Eff
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Ref
-import Control.Apply (lift2)
-import Control.Monad.Aff (Aff)
 
-import DOM
-import DOM.Event.MouseEvent as ME
-import DOM.Event.Types as Event
-import DOM.Node.ParentNode (QuerySelector(..))
-import DOM.HTML.HTMLElement
-import DOM.HTML.Types
-
-import Data.Array ((..))
+import Data.Array (length, (..), mapMaybe)
+import Data.Either
+import Data.Foldable
 import Data.Int (toNumber, ceil)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Data.Foldable
+import Data.Record.ShowRecord (showRecord)
+import Data.StrMap
 import Data.Tuple
-import Math (pow, pi)
 
 import Graphics.Canvas
+import Halogen (liftAff)
 import Halogen as H
 import Halogen.Aff (selectElement)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Node.FS
+import DOM
+import DOM.HTML.Types
+import DOM.HTML.HTMLElement
+import DOM.Event.MouseEvent as ME
+import DOM.Event.Types as Event
+import DOM.Node.ParentNode (QuerySelector(..))
+import Network.HTTP.Affjax
 
 import UI.ChordInput as CI
 
@@ -48,8 +50,10 @@ derive instance ord_slot :: Ord Slot
 
 type State = 
   { neck_data :: NeckData
-  , chords :: Array FingeringData
-  , focused :: Maybe Int
+  , curr_chord :: Maybe Chord
+  , curr_fingerings :: Array FingeringData
+  , curr_focused :: Maybe Int
+  , fingering_cache :: FingeringCache
   }
 
 data Query a
@@ -58,12 +62,19 @@ data Query a
   | WipeNeck a
   | ClearAll a
   | MouseMove Event.MouseEvent a
-  | SetChord ChordFingering a
+  | SetChord Fingering a
   | ChordInputMessage CI.Message a
 
 data Message = Unit
 
-type AffM e = Aff (ajax :: AJAX, canvas :: CANVAS, dom :: DOM, fs :: FS, exception :: EXCEPTION, ref :: REF | e)
+type AffM e = Aff
+  ( ajax :: AJAX
+  , avar :: AVAR
+  , canvas :: CANVAS
+  , dom :: DOM
+  , fs :: FS
+  , exception :: EXCEPTION
+  , ref :: REF | e)
 
 guitar_neck :: forall e. NeckData -> H.Component HH.HTML Query Unit Void (AffM e)
 guitar_neck neck =
@@ -78,15 +89,17 @@ guitar_neck neck =
   initialState :: State
   initialState =
     { neck_data: neck
-    , chords: []
-    , focused: Nothing
+    , curr_chord: Nothing
+    , curr_fingerings: []
+    , curr_focused: Nothing
+    , fingering_cache: { open: empty, moveable: empty }
     }
 
   render :: State -> H.ParentHTML Query CI.Query Slot (AffM e)
   render state =
     let
-      width  = state.neck_data.width
-      height = state.neck_data.height
+      width  = state.neck_data.width  + state.neck_data.x_offset
+      height = state.neck_data.height + state.neck_data.y_offset
     in
       HH.div_
         [ HH.div
@@ -113,7 +126,9 @@ guitar_neck neck =
   eval = case _ of
     PaintNeck next -> do
       state <- H.get
+      fingerings <- liftAff read_fingerings
       H.liftEff (paint_neck state.neck_data)
+      H.put $ state {fingering_cache = fingerings}
       pure next
     SetNeck neck_data next -> do
       state <- H.get
@@ -130,26 +145,36 @@ guitar_neck neck =
       element <- H.liftAff $ selectElement (QuerySelector "#content #guitar")
       offset <- H.liftEff $ maybe (pure zero) calc_offset element
       let p = point (toNumber $ ME.pageX me) (toNumber $ ME.pageY me) - offset
-      cmajs <- H.liftEff (get_fingerings state.neck_data chord)
-      let closest = get_closest state.neck_data p cmajs
+      let closest = get_closest state.neck_data p state.curr_fingerings
       case closest of
         Just c  -> eval (SetChord c.fingering next)
         Nothing -> pure next
-      {-
-        i <- index of closest chord
-        if (state.focus != Just i) then
-          state.focus = Just i
-          SetChord chords i
-      -}
     SetChord chord next -> do
       state <- H.get
+      --if chord is different, do this stuff
       _ <- eval (WipeNeck next)
       H.liftEff (paint_chord state.neck_data chord)
       pure next 
     -- GetChord chord -> pure $ chord unit
-    ChordInputMessage _ next -> do
+    ChordInputMessage (CI.ChangedState message) next -> do
+      state <- H.get
+      new_state <- H.liftAff $ next_state message state
+      H.put new_state
       pure next
 
+next_state :: forall e. Either String Chord -> State -> AffM e State
+next_state either state = case either of
+  Left  _     -> pure $ state
+    { curr_chord = Nothing
+    , curr_fingerings = []
+    , curr_focused = Nothing }
+  Right chord -> do
+    let fingerings = get_fingerings state.fingering_cache chord
+    let centeroids = mapMaybe (cache_centeroid state.neck_data) fingerings
+    pure $ state
+      { curr_chord = Just chord
+      , curr_fingerings = centeroids
+      , curr_focused = Nothing }
 
 calc_offset :: forall e. HTMLElement -> Eff (dom :: DOM | e) Point
 calc_offset element = lift2 point (offsetLeft element) (offsetTop element)

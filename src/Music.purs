@@ -5,7 +5,8 @@ module Music (
   module Music.Key,
   module Music.Mode,
   module Music.Note,
-  module Music.Scale
+  module Music.Scale,
+  module Music.Transpose
 ) where
 
 import Music.Chord
@@ -15,3 +16,4 @@ import Music.Key
 import Music.Mode
 import Music.Note
 import Music.Scale
+import Music.Transpose

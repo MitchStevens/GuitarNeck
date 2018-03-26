@@ -5,9 +5,12 @@ import Data.Either
 import Data.Maybe
 import Music
 import Prelude
+import ChordMarkup
+import Debug.Trace
 
 import Control.Monad.Aff (Aff)
 import Data.Traversable (traverse)
+import Data.Bifunctor (lmap)
 import Halogen as H
 import Halogen.Aff (selectElement)
 import Halogen.HTML as HH
@@ -49,9 +52,9 @@ chord_input =
   eval :: Query ~> H.ComponentDSL State Query Message (Aff e)
   eval = case _ of
     StringInput str next -> do
-      H.put $ case runParser str parse_chord of
-        Left  error -> Left $ show error
-        Right chord -> Right chord
+      let state = (lmap show $ runParser str parse_chord) :: State
+      H.put state
+      H.raise $ ChangedState state
       pure next
     CurrentChord f -> do
       state <- H.get
@@ -59,16 +62,3 @@ chord_input =
 
 display_error :: forall p i. String -> H.HTML p i
 display_error error = HH.span [ HP.id_ "error_display" ] [ HH.text error ]
-
-display_chord :: forall p i. Chord -> H.HTML p i
-display_chord (Chord root mode exts) = 
-  HH.span [ HP.id_ "chord-display" ]
-    [ HH.span [ HP.class_ (H.ClassName "root") ] [ HH.text (show root)]
-    , HH.span [ HP.class_ (H.ClassName "mode") ] [ HH.text (show mode)]
-    , HH.span_ (map ext_html exts)
-    ]
-  where
-    ext_html :: Extension -> H.HTML p i
-    ext_html ext = HH.span
-      [ HP.class_ (H.ClassName "extension")]
-      [ HH.text (show  ext) ]

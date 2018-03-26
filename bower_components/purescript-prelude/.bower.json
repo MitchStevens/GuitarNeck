@@ -1,0 +1,29 @@
+{
+  "name": "purescript-prelude",
+  "homepage": "https://github.com/purescript/purescript-prelude",
+  "description": "The PureScript Prelude",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/purescript/purescript-prelude.git"
+  },
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules",
+    "output",
+    "test",
+    "bower.json",
+    "package.json"
+  ],
+  "version": "3.1.1",
+  "_release": "3.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v3.1.1",
+    "commit": "8bf3ca6a65ad8728df83c63876ca2c3157291ad7"
+  },
+  "_source": "https://github.com/purescript/purescript-prelude.git",
+  "_target": "^3.1.1",
+  "_originalSource": "purescript-prelude"
+}

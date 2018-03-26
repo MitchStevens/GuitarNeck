@@ -28,7 +28,18 @@ derive instance generic_mode  :: Generic Mode _
 derive instance eq_mode       :: Eq Mode
 derive instance ord_mode      :: Ord Mode
 instance show_mode            :: Show Mode where
-  show = genericShow
+  show = case _ of
+    Major      -> "maj"
+    Minor      -> "min"
+    Ionian     -> "min"
+    Dorian	   -> "min"
+    Phrygian	 -> "min"
+    Lydian	   -> "maj"
+    Mixolydian -> "dom"
+    Aeolian	   -> "min"
+    Locrian	   -> "min"
+    Augmented  -> "aug"
+    Diminished -> "dim"
 instance enum_pitch           :: Enum Mode where
   succ = genericSucc
   pred = genericPred

@@ -1,0 +1,29 @@
+{
+  "name": "purescript-record-show",
+  "homepage": "https://github.com/matthewleon/purescript-record-show",
+  "license": "MIT",
+  "authors": [
+    "Matthew Leon <ml@matthewleon.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/matthewleon/purescript-record-show.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output",
+    "test",
+    "bower.json",
+    "package.json"
+  ],
+  "dependencies": {
+    "purescript-record": "^0.2.4",
+    "purescript-lists": "^4.11.0"
+  },
+  "devDependencies": {
+    "purescript-psci-support": "^3.0.0",
+    "purescript-assert": "^3.0.0"
+  }
+}

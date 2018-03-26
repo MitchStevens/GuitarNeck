@@ -7,9 +7,9 @@ derive instance eq_extension :: Eq Extension
 
 instance show_extension :: Show Extension where
   show = case _ of 
-    Sharp n -> "(#"<> show n <>")"
-    Flat n  -> "(b"<> show n <> ")"
-    Add n   -> if n==7 then "7" else "(add"<> show n <>")"
+    Sharp n -> "#" <> show n
+    Flat n  -> "b" <> show n
+    Add n   -> show n
     Sus2    -> "sus2"
     Sus4    -> "sus4"
 

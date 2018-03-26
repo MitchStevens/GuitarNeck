@@ -1,84 +1,61 @@
 module Reader where
 
-import ChordFingering
+import Prelude
+import Parsing
+import Fingering
+import Fret
+import NeckData
+import Music
+
+import Control.Apply
 import Control.Monad.Aff
 import Control.Monad.Aff.Class
+import Control.Monad.Aff.AVar
 import Control.Monad.Eff
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Ref
 import Control.Monad.Eff.Class
-import Data.Array
-import Data.Either
-import Data.Maybe
-import Data.StrMap
-import Debug.Trace
-import Fret
-import Music.Chord
-import NeckData
-import Node.FS
-import Node.FS.Sync
-import Prelude
 
-import DOM.HTML.HTMLFormElement (reset)
+import Debug.Trace
+import JsonParser
+
+import Data.Array
 import Data.Argonaut.Core (Json, JArray, JObject, JString, foldJsonObject, foldJsonArray, foldJsonString)
 import Data.Argonaut.Parser (jsonParser)
+import Data.Either
 import Data.Int (fromString)
+import Data.Maybe
 import Data.String (Pattern(..), split)
+import Data.StrMap
 import Data.Traversable (traverse)
+
+import DOM.HTML.HTMLFormElement (reset)
 import Network.HTTP.Affjax (AJAX, AffjaxResponse, get)
-import Node.Encoding (Encoding(..))
 
-type F m a = forall e. m (ajax :: AJAX, ref :: REF, exception :: EXCEPTION | e) a
-type EffM a = F Eff a
-type AffM a = F Aff a
-type FingeringMap = StrMap (Array ChordFingering)
+type AffM e a = Aff
+  ( ajax :: AJAX
+  , avar :: AVAR
+  , ref :: REF
+  , exception :: EXCEPTION | e) a
 
-moveable_fingerings :: EffM (Ref FingeringMap)
-moveable_fingerings = newRef empty <* init
-  where
-    init = launchAff $ do
-      res :: AffjaxResponse String <- get "http://www.mitchstevens.com/guitar/barre_chords"
-      let _ = trace (show res.response) id
-      pure unit
+type FingeringCache =
+  { open     :: StrMap (Array Fingering)
+  , moveable :: StrMap (Array Fingering)
+  }
 
-{-
-    init = launchAff_ $ do
-      barre_chords <- get "http://www.mitchstevens.com/guitar/barre_chords"
-      let a = barre_chords.response :: String
-      let _ = trace (show barre_chords.response) id
-  --file <- readTextFile UTF8 "barre_chords.json"
-  --fingerings <- case jsonParser file of
-  --    Left  str  -> throwException $ error str
-  --    Right json -> pure $ read_fingerings json
-      pure unit
--}
+read_fingerings :: forall e. AffM e FingeringCache
+read_fingerings = do
+  let decode = decode_fingering_map <<< (\x -> x.response)
+  let cache open move = {open: open, moveable: move}
+  open_eith <- decode <$> get "http://localhost:9000/chords/open"
+  move_eith <- decode <$> get "http://localhost:9000/chords/moveable"
+  case lift2 cache open_eith move_eith of
+    Left err    -> throwError $ error err
+    Right cache -> pure cache
 
-
-
-
-get_fingerings :: forall e. NeckData -> Chord -> EffM (Array FingeringData)
-get_fingerings neck chord = do
-  fingerings <- all_fingerings chord
-  if null fingerings
-    then throwException $ error ("Couldn't find any chord fingerings for chord " <> show chord)
-    else pure $ mapMaybe (cache_centeroid neck) fingerings
-
-all_fingerings :: forall e. Chord -> EffM (Array ChordFingering)
-all_fingerings chords = do
-  table <- moveable_fingerings >>= readRef
-  pure $ fromMaybe [] (lookup "min7" table)
-
-read_fingerings :: Json -> StrMap (Array ChordFingering)
-read_fingerings = foldJsonObject empty (map (foldJsonArray [] read_block))
-  where 
-  
-  read_block :: JArray -> Array ChordFingering
-  read_block jarray = mapMaybe (foldJsonString Nothing read_fingering) jarray
-
-  -- E-A-D-G-B-e
-  read_fingering :: JString -> Maybe ChordFingering
-  read_fingering str = 
-    let frets = (fromString >=> as_fret) <$> split (Pattern "-") str
-    in case frets of
-      [e2, a2, d3, g3, b3, e4] -> Just $ Fingering {e4: e4, b3: b3, g3: g3, d3: d3, a2: a2, e2: e2}
-      _ -> Nothing
+get_fingerings :: forall e. FingeringCache -> Chord -> Array Fingering
+get_fingerings fingerings chord@(Chord root _ _) =
+  let suffix = show_quality chord <> show_extensions chord
+      note_num = pcToInt root
+      a = trace (show suffix) id
+  in map (trans note_num) $ fromMaybe [] $ lookup suffix fingerings.moveable
