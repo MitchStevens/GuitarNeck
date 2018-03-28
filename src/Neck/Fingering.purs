@@ -1,20 +1,23 @@
 module Fingering where
 
-import Fret
-import NeckData
-import Prelude
-
 import Data.Argonaut.Decode
-import Data.Array (catMaybes, zipWith)
-import Data.Foldable (intercalate, null, length)
-import Data.Int (toNumber)
+import Data.Lattice
 import Data.Maybe
 import Data.Ring
-import Data.String ()
 import Data.Traversable
 import Data.Tuple
+import Fret
+import Interval
+import Music.Transpose
+import NeckData
+import Prelude hiding (join,bottom)
+import Debug.Trace
 
 import DOM.Event.Types (MouseEvent)
+import Data.Array (mapMaybe, catMaybes, zipWith)
+import Data.Foldable (intercalate, null, length)
+import Data.Int (toNumber)
+import Data.String ()
 import Math (pow, sqrt)
 
 newtype Point = Point { x :: Number, y :: Number }
@@ -57,25 +60,27 @@ instance foldable_chord :: Foldable ChordF where
   foldl f z chord = foldl f z $ to_array chord
   foldr f z chord = foldr f z $ to_array chord
   foldMap f chord = foldMap f $ to_array chord
+
 type Fingering = ChordF (Maybe Fret)
-instance show_chord :: Show (ChordF (Maybe Fret)) where
+instance show_fingering :: Show (ChordF (Maybe Fret)) where
   show chord = intercalate "-" $ map (maybe "x" show) chord
-instance transpose_chord :: Transpose (ChordF (Maybe Fret)) where
-  trans n = 
+
+shift_fingering :: Int -> Fingering -> Fingering
+shift_fingering n fingering =
+  if meet range (interval (Fret 0) (Fret 11)) == EmptyInterval
+    then (map<<<map) (_ - (Fret 12)) new_fingering
+    else new_fingering
+  where
+    a = trace (show range) id
+    range = fret_interval new_fingering
+    new_fingering = (map<<<map) (_ + (Fret n)) fingering :: Fingering
 
 to_array :: ChordF ~> Array
 to_array (Fingering c) = [c.e4, c.b3, c.g3, c.d3, c.a2, c.e2]
 
-{-
-
-Traversal s t a b = forall f. Applicative f => (a -> f b) -> s -> f t 
-
-newtype ChordF a = ChordF {e4 :: a,  b3 :: a, g3 :: a, d3 :: a, a2 :: a, e2 :: a} deriving Functor
-type Chord = Chord Int
-transpose :: Int -> Chord Int -> Chord Int
-transpose n = fmap (+n)
-
--}
+fret_interval :: Fingering -> Interval Fret
+fret_interval fingering = foldl join bottom frets
+  where frets = map singleton $ catMaybes (to_array fingering)
 
 type FingeringData =
   { fingering :: Fingering

@@ -2,24 +2,36 @@
 "use strict";
 var Control_Applicative = require("../Control.Applicative");
 var Control_Bind = require("../Control.Bind");
+var Control_Category = require("../Control.Category");
 var Control_Monad_Aff = require("../Control.Monad.Aff");
 var Control_Monad_Eff = require("../Control.Monad.Eff");
+var Control_Monad_Eff_AVar = require("../Control.Monad.Eff.AVar");
+var Control_Monad_Eff_Class = require("../Control.Monad.Eff.Class");
+var Control_Monad_Eff_Console = require("../Control.Monad.Eff.Console");
 var Control_Monad_Eff_Exception = require("../Control.Monad.Eff.Exception");
+var Control_Monad_Eff_Ref = require("../Control.Monad.Eff.Ref");
 var Control_Monad_Error_Class = require("../Control.Monad.Error.Class");
 var DOM = require("../DOM");
+var DOM_HTML = require("../DOM.HTML");
+var DOM_HTML_HTMLElement = require("../DOM.HTML.HTMLElement");
+var DOM_HTML_Location = require("../DOM.HTML.Location");
 var DOM_HTML_Types = require("../DOM.HTML.Types");
+var DOM_HTML_Window = require("../DOM.HTML.Window");
 var DOM_Node_ParentNode = require("../DOM.Node.ParentNode");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
 var Data_Maybe = require("../Data.Maybe");
+var Data_Show = require("../Data.Show");
 var Data_Tuple = require("../Data.Tuple");
 var Data_Unit = require("../Data.Unit");
+var Debug_Trace = require("../Debug.Trace");
 var Fret = require("../Fret");
 var Graphics_Canvas = require("../Graphics.Canvas");
+var Halogen = require("../Halogen");
 var Halogen_Aff = require("../Halogen.Aff");
 var Halogen_Aff_Util = require("../Halogen.Aff.Util");
-var Halogen_HTML_Properties = require("../Halogen.HTML.Properties");
 var Halogen_VDom_Driver = require("../Halogen.VDom.Driver");
+var NeckData = require("../NeckData");
 var Network_HTTP_Affjax = require("../Network.HTTP.Affjax");
 var Node_FS = require("../Node.FS");
 var Prelude = require("../Prelude");
@@ -32,18 +44,35 @@ var default_neck_data = {
     height: 120.0,
     num_frets: 15
 };
+var calc_neck_data = function (element) {
+    return function __do() {
+        var v = DOM_HTML_HTMLElement.offsetWidth(element)();
+        var v1 = DOM_HTML_HTMLElement.offsetHeight(element)();
+        var v2 = Debug_Trace.trace(Debug_Trace.warn())(Data_Show.show(Data_Show.showNumber)(v1))(Control_Category.id(Control_Category.categoryFn));
+        return {
+            x_offset: 0.0,
+            y_offset: 20.0,
+            width: v,
+            height: v1,
+            num_frets: 15
+        };
+    };
+};
 var await_guitar = Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(Halogen_Aff_Util.awaitLoad)(function () {
     return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_Aff_Util.selectElement("#content #guitar"))(function (v) {
         return Data_Maybe.maybe(Control_Monad_Error_Class.throwError(Control_Monad_Aff.monadThrowAff)(Control_Monad_Eff_Exception.error("Could not find element")))(Control_Applicative.pure(Control_Monad_Aff.applicativeAff))(v);
     });
 });
 var main = Data_Functor["void"](Control_Monad_Eff.functorEff)(Halogen_Aff_Util.runHalogenAff(Control_Bind.bind(Control_Monad_Aff.bindAff)(await_guitar)(function (v) {
-    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_GuitarNeck.guitar_neck(default_neck_data))(Data_Unit.unit)(v))(function (v1) {
-        return v1.query(new UI_GuitarNeck.PaintNeck(Data_Unit.unit));
+    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(calc_neck_data(v)))(function (v1) {
+        return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_GuitarNeck.guitar_neck(v1))(Data_Unit.unit)(v))(function (v2) {
+            return v2.query(new UI_GuitarNeck.PaintNeck(Data_Unit.unit));
+        });
     });
 })));
 module.exports = {
     default_neck_data: default_neck_data,
     main: main,
-    await_guitar: await_guitar
+    await_guitar: await_guitar,
+    calc_neck_data: calc_neck_data
 };

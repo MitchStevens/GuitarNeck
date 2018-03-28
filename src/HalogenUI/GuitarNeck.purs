@@ -6,6 +6,7 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Ref
 import Control.Monad.Aff (Aff)
+import Control.Monad.Eff.Console
 
 import Debug.Trace
 import Fingering
@@ -14,6 +15,7 @@ import Music
 import NeckData
 import Node.FS
 import CanvasOperations
+import Text.Parsing.Parser (ParseError)
 import Prelude
 import Reader
 
@@ -28,7 +30,7 @@ import Data.Array (length, (..), mapMaybe)
 import Data.Either
 import Data.Foldable
 import Data.Int (toNumber, ceil)
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe, isJust)
 import Data.StrMap
 import Data.Tuple
 
@@ -39,6 +41,11 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Events as He
 import Halogen.HTML.Properties as HP
+
+import DOM.HTML
+import DOM.HTML.Window
+import DOM.HTML.Location
+
 import Graphics.Canvas
 import Network.HTTP.Affjax
 import Math (pow, pi)
@@ -68,11 +75,11 @@ data Query a
   | ChordInputMessage CI.Message a
 
 data Message = Unit
-
 type AffM e = Aff
   ( ajax :: AJAX
   , avar :: AVAR
   , canvas :: CANVAS
+  , console :: CONSOLE
   , dom :: DOM
   , fs :: FS
   , exception :: EXCEPTION
@@ -102,6 +109,9 @@ guitar_neck neck =
     let
       width  = state.neck_data.width  + state.neck_data.x_offset
       height = state.neck_data.height + state.neck_data.y_offset
+      num_fingerings = if isJust state.curr_chord
+        then "Found "<>(show $ length state.curr_fingerings)<>" chords."
+        else ""
     in
       HH.div_
         [ HH.div
@@ -124,13 +134,15 @@ guitar_neck neck =
             ]
           ]
         , HH.slot ChordInputSlot CI.chord_input unit (HE.input ChordInputMessage)
+        , HH.div_ [ HH.text num_fingerings ]
         ]
 
   eval :: Query ~> H.ParentDSL State Query CI.Query Slot Void (AffM e)
   eval = case _ of
     PaintNeck next -> do
       state <- H.get
-      fingerings <- liftAff read_fingerings
+      url <- H.liftEff (window >>= location >>= origin)
+      fingerings <- H.liftAff $ read_fingerings url
       H.liftEff (paint_neck state.neck_data)
       H.put $ state {fingering_cache = fingerings}
       pure next
@@ -158,12 +170,11 @@ guitar_neck neck =
     MouseLeave next -> do
       state <- H.get
       _ <- eval (WipeNeck next)
-      let (centeroids :: Array Point) = map (\x -> x.centeroid) state.curr_fingerings
+      let centeroids = map (\x -> x.centeroid) state.curr_fingerings
       H.liftEff (paint_centeroids state.neck_data centeroids)
       pure next
     SetChord chord next -> do
       state <- H.get
-      --if chord is different, do this stuff
       _ <- eval (WipeNeck next)
       H.liftEff (paint_chord state.neck_data chord)
       pure next
@@ -171,9 +182,10 @@ guitar_neck neck =
       state <- H.get
       new_state <- H.liftAff $ next_state message state
       H.put new_state
+      _ <- eval (MouseLeave next)
       pure next
 
-next_state :: forall e. Either String Chord -> State -> AffM e State
+next_state :: forall e. Either ParseError Chord -> State -> AffM e State
 next_state either state = case either of
   Left  _     -> pure $ state
     { curr_chord = Nothing
@@ -189,5 +201,3 @@ next_state either state = case either of
 
 calc_offset :: forall e. HTMLElement -> Eff (dom :: DOM | e) Point
 calc_offset element = lift2 point (offsetLeft element) (offsetTop element)
-
-chord = Chord C Major [Add 7]

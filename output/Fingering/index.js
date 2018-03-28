@@ -3,15 +3,18 @@
 var Control_Applicative = require("../Control.Applicative");
 var Control_Apply = require("../Control.Apply");
 var Control_Bind = require("../Control.Bind");
+var Control_Category = require("../Control.Category");
 var Control_Semigroupoid = require("../Control.Semigroupoid");
 var DOM_Event_Types = require("../DOM.Event.Types");
 var Data_Argonaut_Decode = require("../Data.Argonaut.Decode");
 var Data_Array = require("../Data.Array");
+var Data_Eq = require("../Data.Eq");
 var Data_EuclideanRing = require("../Data.EuclideanRing");
 var Data_Foldable = require("../Data.Foldable");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
 var Data_Int = require("../Data.Int");
+var Data_Lattice = require("../Data.Lattice");
 var Data_Maybe = require("../Data.Maybe");
 var Data_Monoid = require("../Data.Monoid");
 var Data_Ord = require("../Data.Ord");
@@ -22,8 +25,11 @@ var Data_Show = require("../Data.Show");
 var Data_String = require("../Data.String");
 var Data_Traversable = require("../Data.Traversable");
 var Data_Tuple = require("../Data.Tuple");
+var Debug_Trace = require("../Debug.Trace");
 var Fret = require("../Fret");
+var Interval = require("../Interval");
 var $$Math = require("../Math");
+var Music_Transpose = require("../Music.Transpose");
 var NeckData = require("../NeckData");
 var Prelude = require("../Prelude");
 var Point = function (x) {
@@ -103,6 +109,26 @@ var functor_chord = new Data_Functor.Functor(function (f) {
         };
     };
 });
+var fret_interval = function (fingering) {
+    var frets = Data_Functor.map(Data_Functor.functorArray)(Interval.singleton(Fret.ord_fret))(Data_Array.catMaybes(to_array(fingering)));
+    return Data_Foldable.foldl(Data_Foldable.foldableArray)(Data_Lattice.join(Interval.join_interval(Fret.ord_fret)))(Data_Lattice.bottom(Interval.boundedjoin_interval(Fret.ord_fret)))(frets);
+};
+var shift_fingering = function (n) {
+    return function (fingering) {
+        var new_fingering = Data_Functor.map(functor_chord)(Data_Functor.map(Data_Maybe.functorMaybe)(function (v) {
+            return Data_Semiring.add(Fret.semiring_fret)(v)(n);
+        }))(fingering);
+        var range = fret_interval(new_fingering);
+        var a = Debug_Trace.trace(Debug_Trace.warn())(Data_Show.show(Interval.show_interval(Fret.show_fret))(range))(Control_Category.id(Control_Category.categoryFn));
+        var $30 = Data_Eq.eq(Interval.eq_interval(Fret.eq_fret))(Data_Lattice.meet(Interval.meet_interval(Fret.ord_fret))(range)(Interval.interval(Fret.ord_fret)(0)(11)))(Interval.EmptyInterval.value);
+        if ($30) {
+            return Data_Functor.map(functor_chord)(Data_Functor.map(Data_Maybe.functorMaybe)(function (v) {
+                return Data_Ring.sub(Fret.ring_fret)(v)(12);
+            }))(new_fingering);
+        };
+        return new_fingering;
+    };
+};
 var foldable_chord = new Data_Foldable.Foldable(function (dictMonoid) {
     return function (f) {
         return function (chord) {
@@ -122,7 +148,7 @@ var foldable_chord = new Data_Foldable.Foldable(function (dictMonoid) {
         };
     };
 });
-var show_chord = new Data_Show.Show(function (chord) {
+var show_fingering = new Data_Show.Show(function (chord) {
     return Data_Foldable.intercalate(foldable_chord)(Data_Monoid.monoidString)("-")(Data_Functor.map(functor_chord)(Data_Maybe.maybe("x")(Data_Show.show(Fret.show_fret)))(chord));
 });
 var factor = function (n) {
@@ -153,8 +179,8 @@ var get_closest = function (dictFoldable) {
 var centeroid_chord = function (neck_data) {
     return function (chord) {
         var points = to_points(neck_data)(chord);
-        var $31 = Data_Foldable["null"](Data_Foldable.foldableArray)(points);
-        if ($31) {
+        var $34 = Data_Foldable["null"](Data_Foldable.foldableArray)(points);
+        if ($34) {
             return Data_Maybe.Nothing.value;
         };
         return Data_Maybe.Just.create(factor(1.0 / Data_Int.toNumber(Data_Foldable.length(Data_Foldable.foldableArray)(Data_Semiring.semiringInt)(points)))(Data_Foldable.sum(Data_Foldable.foldableArray)(semiring_point)(points)));
@@ -202,7 +228,9 @@ module.exports = {
     distance: distance,
     point: point,
     Fingering: Fingering,
+    shift_fingering: shift_fingering,
     to_array: to_array,
+    fret_interval: fret_interval,
     cache_centeroid: cache_centeroid,
     to_points: to_points,
     centeroid_chord: centeroid_chord,
@@ -214,5 +242,5 @@ module.exports = {
     apply_chord: apply_chord,
     applicative_chord: applicative_chord,
     foldable_chord: foldable_chord,
-    show_chord: show_chord
+    show_fingering: show_fingering
 };

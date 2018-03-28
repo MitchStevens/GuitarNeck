@@ -2,77 +2,52 @@ module Music.Chord where
 
 import Prelude hiding (degree)
 import Data.Array
+import Data.Either
+import Data.Foldable hiding (foldM, length, null)
+import Data.Maybe
+
 import Music.Mode
 import Music.Transpose
 import Music.Scale
 import Music.Note
 import Music.Key
 import Music.Extension
-import Data.Either
-import Data.Foldable hiding (foldM, length, null)
 
 data Chord = Chord PitchClass Mode (Array Extension)
 instance eq_chord :: Eq Chord where
-  eq c1 c2 = to_notes c1 `same_elements` to_notes c2
-    where same_elements a b = null (a\\b) && null (b\\a)
+  eq c1 c2 = true
 instance show_chord :: Show Chord where
-  show chord@(Chord root mode exts) = foldMap id [show root, show_quality chord,show_extensions chord]
+  show chord = m.root <> chord_suffix chord
+    where m = markup chord
 
-show_quality :: Chord -> String
-show_quality (Chord _ Major _) = ""
-show_quality (Chord _ Minor _) = "m"
-show_quality (Chord _ Mixolydian _) = ""
-show_quality (Chord _ Diminished []) = "dim"
-show_quality (Chord _ Augmented []) = "aug"
-show_quality (Chord _ mode _) = show mode
-
-show_extensions :: Chord -> String
-show_extensions (Chord _ _ exts) = foldMap show exts
+chord_suffix :: Chord -> String
+chord_suffix chord = m.mode <> m.head_ext <> fold m.tail_ext
+  where m = markup chord
 
 instance transpose_chord :: Transpose Chord where
   trans :: Int -> Chord -> Chord
-  trans n (Chord root qual exts) = Chord (trans n root) qual exts
+  trans n (Chord root mode exts) = Chord (trans n root) mode exts
 
-{-
-  Converting a chord to a collection of pitches is non-trivial. THings to keep in mind:
-        - The root is the lowest note
-        -scale_ext :: Pitch -> Mode -> Extension -> Pitch
--}
-to_notes :: Chord -> Array Pitch
-to_notes (Chord root mode exts) = root_note : map (find_extension keyed_note) notes
+type ChordMarkup =
+  { root :: String
+  , mode :: String
+  , head_ext :: String
+  , tail_ext :: Array String
+  }
+
+markup :: Chord -> ChordMarkup
+markup (Chord root Major [])        = mk_markup root "" []
+markup (Chord root Major exts)      = mk_markup root "maj" exts
+markup (Chord root Minor exts)      = mk_markup root "m" exts
+markup (Chord root Mixolydian exts) = mk_markup root "" exts
+markup (Chord root Diminished exts) = mk_markup root "dim" exts
+markup (Chord root Augmented exts)  = mk_markup root "aug" exts
+markup (Chord root _ exts)          = mk_markup root "???" exts
+
+mk_markup :: PitchClass -> String -> Array Extension -> ChordMarkup
+mk_markup root mode exts = case uncons (map show exts) of
+  Just {head: x, tail: xs} -> mk_exts x (map bracket xs)
+  Nothing                  -> mk_exts "" []
   where
-    keyed_note = Keyed {pitch: root, mode: mode} root_note
-    root_note = Pitch root 4 :: Pitch
-    notes = (if contains_ext 3 then [] else [Add 3])
-         <> (if contains_ext 5 then [] else [Add 5])
-         <> exts
-    contains_ext n = any (\ex -> degree ex == n) exts
-
-{-
-  What makes a valid chord?
-    - A chord cannot have a 'No x' and another modifier
-    - A chord cannot have more than 7 notes
-    - A chord cannot have two different extensions for the same note, i.e. Sharp 6 and a Flat 6
-
-    TODO: 
--}
-mk_chord :: PitchClass -> Mode -> Array Extension -> Either String Chord
-mk_chord note mode exts = Right $ Chord note mode exts
-
-add_ext :: Chord -> Extension -> Either String Chord
-add_ext chord@(Chord note qual exts) e
-  | length exts > 5 = Left "Too many notes in chord"
-  | not (degree_test chord e) = Left $ "Two exts of the same degree found in chord. All extensions: "<> show (implicit_extensions e <> exts)
-  | otherwise = Right $ Chord note qual (implicit_extensions e)
-
-degree_test :: Chord -> Extension -> Boolean 
-degree_test (Chord _ _ exts) e = and $ diff_degree <$> implicit_extensions e <*> exts
-  where diff_degree a b = degree a /= degree b
-
--- Sometimes adding an extesion mean adding more than one extension:
---   * Cm9 is a chord with a C minor triad, a flat 7, and
-implicit_extensions :: Extension -> Array Extension
-implicit_extensions (Add 9)  = [Add 7, Add 9]
-implicit_extensions (Add 11) = [Add 7, Add 9, Add 11]
-implicit_extensions (Add 13) = [Add 7, Add 9, Add 11, Add 13]
-implicit_extensions ext = [ext]
+    mk_exts x y = {root:show root, mode: mode, head_ext:x, tail_ext:y}
+    bracket x = "("<>x<>")"
