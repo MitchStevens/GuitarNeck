@@ -12,36 +12,14 @@ import Music.Transpose
 import NeckData
 import Prelude hiding (join,bottom)
 import Debug.Trace
+import Point
 
 import DOM.Event.Types (MouseEvent)
-import Data.Array (mapMaybe, catMaybes, zipWith)
+import Data.Array (mapMaybe, catMaybes, zipWith, (..))
 import Data.Foldable (intercalate, null, length)
 import Data.Int (toNumber)
 import Data.String ()
 import Math (pow, sqrt)
-
-newtype Point = Point { x :: Number, y :: Number }
-instance semiring_point :: Semiring Point where
-  zero = Point {x: 0.0, y: 0.0}
-  one  = Point {x: 1.0, y: 1.0}
-  add (Point p1) (Point p2) = Point {x: p1.x+p2.x, y: p1.y+p2.y}
-  mul (Point p1) (Point p2) = Point {x: p1.x*p2.x, y: p1.y*p2.y}
-instance ring_point :: Ring Point where
-  sub (Point p1) (Point p2) = Point {x: p1.x-p2.x, y: p1.y-p2.y}
-instance show_point :: Show Point where
-  show (Point p) = "("<> show p.x <>", "<> show p.y <>")"
-
-factor :: Number -> Point -> Point
-factor n (Point p) = Point {x: n*p.x, y: n*p.y}
-
-distance :: Point -> Point -> Number
-distance p1 p2 = sqrt $ pow p.x 2.0 + pow p.y 2.0
-  where Point p = p1 - p2
-
-point :: Number -> Number -> Point
-point x y = Point {x: x, y: y}
-
-----------------------------------
 
 newtype ChordF a = Fingering {e4 :: a,  b3 :: a, g3 :: a, d3 :: a, a2 :: a, e2 :: a}
 instance functor_chord :: Functor ChordF where
@@ -84,8 +62,7 @@ fret_interval fingering = foldl join bottom frets
 
 type FingeringData =
   { fingering :: Fingering
-  , centeroid :: Point
-  }
+  , centeroid :: Point }
 
 cache_centeroid :: NeckData -> Fingering -> Maybe FingeringData
 cache_centeroid neck chord = do
@@ -93,15 +70,13 @@ cache_centeroid neck chord = do
   pure $ { fingering: chord, centeroid: centeroid}
 
 to_points :: NeckData -> Fingering -> Array Point
-to_points neck chord = catMaybes $ zipWith maybe_point xs ys
+to_points neck_data chord = map f <<< catMaybes $ zipWith maybe_point xs (0..5)
   where
-    xs = (map <<< map) (fret_marker neck) $ to_array chord
-    ys = map (str_y neck) [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    xs = (map<<<map) (\(Fret n) -> n) $ to_array chord
+    f = fret_transformation neck_data
 
-    maybe_point :: Maybe Number -> Number -> Maybe Point
-    maybe_point mx y = do
-      x <- mx
-      pure $ point x y
+    maybe_point :: Maybe Int -> Int -> Maybe Point
+    maybe_point mx y = map (flip point_int y) mx
 
 centeroid_chord :: NeckData -> Fingering -> Maybe Point
 centeroid_chord neck_data chord =

@@ -37,9 +37,6 @@ instance show_interval :: (Show a) => Show (Interval a) where
   show EmptyInterval = "{}"
   show (Interval r) = "["<> show (r.min) <>", "<> show (r.max) <>"]"
 
-singleton :: forall a. Ord a => a -> Interval a
-singleton x = interval x x
-
 --Lattice instances
 instance join_interval :: Ord a => L.JoinSemilattice (Interval a) where
   join (Interval a) (Interval b) =
@@ -57,6 +54,8 @@ instance boundedmeet_interval :: Bounded a => L.BoundedMeetSemilattice (Interval
   top = interval bottom top
 instance latticejoin_interval :: Bounded a => L.Lattice (Interval a)
 
+singleton :: forall a. Ord a => a -> Interval a
+singleton x = interval x x
 
 interval :: forall a. Ord a => a -> a -> Interval a
 interval min max = if min > max then EmptyInterval

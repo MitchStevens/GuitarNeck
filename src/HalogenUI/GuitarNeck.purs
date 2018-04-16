@@ -14,10 +14,10 @@ import Fret
 import Music
 import NeckData
 import Node.FS
-import CanvasOperations
 import Text.Parsing.Parser (ParseError)
 import Prelude
 import Reader
+import Point
 
 import DOM
 import DOM.HTML.HTMLElement
@@ -50,6 +50,7 @@ import Graphics.Canvas
 import Network.HTTP.Affjax
 import Math (pow, pi)
 import UI.ChordInput as CI
+import UI.GuitarNeckCanvas
 
 data Slot = ChordInputSlot
 derive instance eq_slot  :: Eq Slot
