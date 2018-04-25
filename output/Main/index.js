@@ -2,7 +2,6 @@
 "use strict";
 var Control_Applicative = require("../Control.Applicative");
 var Control_Bind = require("../Control.Bind");
-var Control_Category = require("../Control.Category");
 var Control_Monad_Aff = require("../Control.Monad.Aff");
 var Control_Monad_Eff = require("../Control.Monad.Eff");
 var Control_Monad_Eff_AVar = require("../Control.Monad.Eff.AVar");
@@ -21,6 +20,8 @@ var DOM_Node_ParentNode = require("../DOM.Node.ParentNode");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
 var Data_Maybe = require("../Data.Maybe");
+var Data_Semigroup = require("../Data.Semigroup");
+var Data_Semiring = require("../Data.Semiring");
 var Data_Show = require("../Data.Show");
 var Data_Tuple = require("../Data.Tuple");
 var Data_Unit = require("../Data.Unit");
@@ -36,7 +37,9 @@ var Network_HTTP_Affjax = require("../Network.HTTP.Affjax");
 var Node_FS = require("../Node.FS");
 var Prelude = require("../Prelude");
 var Reader = require("../Reader");
-var UI_GuitarNeck = require("../UI.GuitarNeck");
+var UI_FFTypes = require("../UI.FFTypes");
+var UI_GuitarComponent = require("../UI.GuitarComponent");
+var selector = "#content #guitar-component";
 var default_neck_data = {
     x_offset: 0.0,
     y_offset: 20.0,
@@ -47,31 +50,34 @@ var default_neck_data = {
 var calc_neck_data = function (element) {
     return function __do() {
         var v = DOM_HTML_HTMLElement.offsetWidth(element)();
-        var v1 = DOM_HTML_HTMLElement.offsetHeight(element)();
-        var v2 = Debug_Trace.trace(Debug_Trace.warn())(Data_Show.show(Data_Show.showNumber)(v1))(Control_Category.id(Control_Category.categoryFn));
         return {
-            x_offset: 0.0,
+            x_offset: 10.0,
             y_offset: 20.0,
             width: v,
-            height: v1,
+            height: v * 0.15,
             num_frets: 15
         };
     };
 };
 var await_guitar = Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(Halogen_Aff_Util.awaitLoad)(function () {
-    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_Aff_Util.selectElement("#content #guitar"))(function (v) {
-        return Data_Maybe.maybe(Control_Monad_Error_Class.throwError(Control_Monad_Aff.monadThrowAff)(Control_Monad_Eff_Exception.error("Could not find element")))(Control_Applicative.pure(Control_Monad_Aff.applicativeAff))(v);
+    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_Aff_Util.selectElement(selector))(function (v) {
+        return Data_Maybe.maybe(Control_Monad_Error_Class.throwError(Control_Monad_Aff.monadThrowAff)(Control_Monad_Eff_Exception.error("Could not find element: " + selector)))(Control_Applicative.pure(Control_Monad_Aff.applicativeAff))(v);
     });
 });
 var main = Data_Functor["void"](Control_Monad_Eff.functorEff)(Halogen_Aff_Util.runHalogenAff(Control_Bind.bind(Control_Monad_Aff.bindAff)(await_guitar)(function (v) {
     return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(calc_neck_data(v)))(function (v1) {
-        return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_GuitarNeck.guitar_neck(v1))(Data_Unit.unit)(v))(function (v2) {
-            return v2.query(new UI_GuitarNeck.PaintNeck(Data_Unit.unit));
+        return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_GuitarComponent.guitar_component)(v1)(v))(function (v2) {
+            return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(Control_Monad_Eff_Console.log(Data_Show.show(Data_Show.showNumber)(v1.width))))(function () {
+                return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(Control_Monad_Eff_Console.log(Data_Show.show(Data_Show.showNumber)(v1.height))))(function () {
+                    return v2.query(new UI_GuitarComponent.Initialise(Data_Unit.unit));
+                });
+            });
         });
     });
 })));
 module.exports = {
     default_neck_data: default_neck_data,
+    selector: selector,
     main: main,
     await_guitar: await_guitar,
     calc_neck_data: calc_neck_data

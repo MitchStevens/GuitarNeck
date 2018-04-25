@@ -6,16 +6,16 @@ import Data.Maybe
 import Data.Ring
 import Data.Traversable
 import Data.Tuple
+import Debug.Trace
 import Fret
 import Interval
 import Music.Transpose
 import NeckData
-import Prelude hiding (join,bottom)
-import Debug.Trace
 import Point
+import Prelude hiding (join,bottom)
 
 import DOM.Event.Types (MouseEvent)
-import Data.Array (mapMaybe, catMaybes, zipWith, (..))
+import Data.Array (catMaybes, foldM, index, mapMaybe, zipWith, (..))
 import Data.Foldable (intercalate, null, length)
 import Data.Int (toNumber)
 import Data.String ()
@@ -83,6 +83,19 @@ centeroid_chord neck_data chord =
   if null points then Nothing else Just $ factor (1.0 / toNumber (length points)) (sum points)
   where points = to_points neck_data chord
 
+closest_index :: NeckData -> Point -> Array FingeringData -> Maybe Int
+closest_index neck point fings = foldM f 0 (0..(length fings - 1))
+  where
+    f :: Int -> Int -> Maybe Int
+    f i j = do
+      di <- dist <$> index fings i
+      dj <- dist <$> index fings j
+      pure $ if di < dj then i else j
+
+    dist :: FingeringData -> Number
+    dist fd = distance point fd.centeroid
+
 get_closest :: forall f. Foldable f => NeckData -> Point -> f FingeringData -> Maybe FingeringData
 get_closest neck_data point chords =
   minimumBy (comparing (\cd -> distance point cd.centeroid)) chords
+
