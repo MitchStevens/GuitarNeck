@@ -2,7 +2,7 @@
 "use strict";
 var Halogen = require("../Halogen");
 var Halogen_HTML = require("../Halogen.HTML");
-var UI_ChordDiagram = require("../UI.ChordDiagram");
+var UI_ChordDiagram_Types = require("../UI.ChordDiagram.Types");
 var UI_Queue = require("../UI.Queue");
 var chord_diagram_queue = UI_Queue.ui_queue;
 module.exports = {

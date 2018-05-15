@@ -69,11 +69,10 @@ cache_centeroid neck chord = do
   centeroid <- centeroid_chord neck chord
   pure $ { fingering: chord, centeroid: centeroid}
 
-to_points :: NeckData -> Fingering -> Array Point
-to_points neck_data chord = map f <<< catMaybes $ zipWith maybe_point xs (0..5)
+to_points :: Fingering -> Array Point
+to_points fingering = catMaybes $ zipWith maybe_point xs (0..5)
   where
-    xs = (map<<<map) (\(Fret n) -> n) $ to_array chord
-    f = fret_transformation neck_data
+    xs = (map<<<map) (\(Fret n) -> n) $ to_array fingering
 
     maybe_point :: Maybe Int -> Int -> Maybe Point
     maybe_point mx y = map (flip point_int y) mx
@@ -81,7 +80,7 @@ to_points neck_data chord = map f <<< catMaybes $ zipWith maybe_point xs (0..5)
 centeroid_chord :: NeckData -> Fingering -> Maybe Point
 centeroid_chord neck_data chord =
   if null points then Nothing else Just $ factor (1.0 / toNumber (length points)) (sum points)
-  where points = to_points neck_data chord
+  where points = map (fret_transformation neck_data) $ to_points chord
 
 closest_index :: NeckData -> Point -> Array FingeringData -> Maybe Int
 closest_index neck point fings = foldM f 0 (0..(length fings - 1))

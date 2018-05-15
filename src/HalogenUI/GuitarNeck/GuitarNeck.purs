@@ -6,11 +6,7 @@ import DOM.HTML.HTMLElement
 import DOM.HTML.Location
 import DOM.HTML.Types
 import DOM.HTML.Window
-import Data.Either
-import Data.Foldable
-import Data.StrMap
-import Data.Tuple
-import Debug.Trace
+
 import Fingering
 import Fret
 import Graphics.Canvas
@@ -25,26 +21,31 @@ import UI.FFTypes
 import UI.GuitarNeckCanvas
 
 import Control.Apply (lift2)
+import Control.Biapplicative (bipure)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Console (log)
+
+import Data.Array (index, length, mapMaybe, (..))
+import Data.Either
+import Data.Foldable
+import Data.Int (toNumber, ceil)
+import Data.Maybe (Maybe(..), fromMaybe, maybe, isJust)
+import Data.StrMap
+import Debug.Trace
+import Data.Tuple
+
 import DOM.Event.MouseEvent as ME
 import DOM.Event.Types as Event
 import DOM.Node.ParentNode (QuerySelector(..))
-import Data.Array (length, (..), mapMaybe)
-import Data.Int (toNumber, ceil)
-import Data.Maybe (Maybe(..), fromMaybe, maybe, isJust)
+
 import Halogen as H
 import Halogen.Aff (selectElement)
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Math (pow, pi)
+
 import Text.Parsing.Parser (ParseError)
-import UI.ChordDiagram as CD
-import UI.ChordDiagramQueue as CQ
-import UI.ChordInput as CI
-import UI.Queue as Q
 
 type Input = NeckData
 
@@ -62,13 +63,13 @@ data Query a
   | MouseMove Event.MouseEvent a
   | MouseEnter a
   | MouseLeave a
-  | ClickChord a
+  | MouseClick a
   | SetChord (Either ParseError Chord) a
   | Display a
 
 data Message
-  = ClickedChord Chord
-  | FocusedChord Chord
+  = ClickedFingering Fingering
+  | FocusedFingering Fingering
 
 guitar_neck :: forall e. H.Component HH.HTML Query Input Message (AffM e)
 guitar_neck =
@@ -112,6 +113,7 @@ guitar_neck =
           , HE.onMouseMove  (HE.input MouseMove)
           , HE.onMouseEnter (HE.input_ MouseEnter)
           , HE.onMouseLeave (HE.input_ MouseLeave)
+          , HE.onClick      (HE.input_ MouseClick)
           ]
         ]
 
@@ -132,17 +134,24 @@ guitar_neck =
       state <- H.get
       element <- H.liftAff $ selectElement (QuerySelector "#content #guitar")
       offset <- H.liftEff $ maybe (pure zero) calc_offset element
-      let p = point (toNumber $ ME.pageX me) (toNumber $ ME.pageY me) - offset
+      let p = point_int (ME.pageX me) (ME.pageY me) - offset
       let closest = closest_index state.neck_data p state.curr_fingerings
       H.liftEff $ log (show closest)
-      if closest == state.focused then pure a 
-       else H.put state { focused = closest } *> eval (Display a)
+      if closest == state.focused
+        then pure a
+        else do
+          maybe (pure unit) (H.raise <<< FocusedFingering) (focused_fingering state)
+          H.put state { focused = closest }
+          eval (Display a)
     MouseEnter a ->
       eval (WipeNeck a)
     MouseLeave a -> do
       H.modify (\st -> st { focused = Nothing })
       eval (Display a)
-    ClickChord a -> pure a
+    MouseClick a -> do
+      state <- H.get
+      maybe (pure unit) (H.raise <<< ClickedFingering) (focused_fingering state)
+      pure a
     SetChord eith a -> do
       state <- H.get
       next_state <- H.liftAff $ next_state eith state
@@ -169,4 +178,10 @@ next_state either state = case either of
       , focused = Nothing }
 
 calc_offset :: forall e. HTMLElement -> EffM e Point
-calc_offset element = lift2 point (offsetLeft element) (offsetTop element)
+calc_offset element = lift2 bipure (offsetLeft element) (offsetTop element)
+
+focused_fingering :: State -> Maybe Fingering
+focused_fingering state = do
+  i <- state.focused
+  fdata <- index state.curr_fingerings i
+  pure fdata.fingering

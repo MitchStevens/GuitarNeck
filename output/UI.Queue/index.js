@@ -52,6 +52,15 @@ var ChildMessage = (function () {
     };
     return ChildMessage;
 })();
+var ChildOutput = (function () {
+    function ChildOutput(value0) {
+        this.value0 = value0;
+    };
+    ChildOutput.create = function (value0) {
+        return new ChildOutput(value0);
+    };
+    return ChildOutput;
+})();
 var ui_queue = (function () {
     var render = function (state) {
         return Halogen_HTML_Elements.span([ Halogen_HTML_Properties.class_("queue-ui") ])(LimitQueue.toArray(state.queue));
@@ -86,9 +95,11 @@ var ui_queue = (function () {
             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value0);
         };
         if (v instanceof ChildMessage) {
-            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
+            return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.raise(new ChildOutput(v.value0)))(function () {
+                return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
+            });
         };
-        throw new Error("Failed pattern match at UI.Queue line 59, column 10 - line 66, column 35: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at UI.Queue line 59, column 10 - line 68, column 12: " + [ v.constructor.name ]);
     };
     return Halogen_Component.parentComponent(Data_Ord.ordInt)({
         initialState: initial,
@@ -101,5 +112,6 @@ module.exports = {
     Cons: Cons,
     Unsnoc: Unsnoc,
     ChildMessage: ChildMessage,
+    ChildOutput: ChildOutput,
     ui_queue: ui_queue
 };

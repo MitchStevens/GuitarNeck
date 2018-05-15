@@ -4,11 +4,8 @@ var Control_Applicative = require("../Control.Applicative");
 var Control_Bind = require("../Control.Bind");
 var Control_Monad_Aff = require("../Control.Monad.Aff");
 var Control_Monad_Eff = require("../Control.Monad.Eff");
-var Control_Monad_Eff_AVar = require("../Control.Monad.Eff.AVar");
 var Control_Monad_Eff_Class = require("../Control.Monad.Eff.Class");
-var Control_Monad_Eff_Console = require("../Control.Monad.Eff.Console");
 var Control_Monad_Eff_Exception = require("../Control.Monad.Eff.Exception");
-var Control_Monad_Eff_Ref = require("../Control.Monad.Eff.Ref");
 var Control_Monad_Error_Class = require("../Control.Monad.Error.Class");
 var DOM = require("../DOM");
 var DOM_HTML = require("../DOM.HTML");
@@ -22,10 +19,10 @@ var Data_Functor = require("../Data.Functor");
 var Data_Maybe = require("../Data.Maybe");
 var Data_Semigroup = require("../Data.Semigroup");
 var Data_Semiring = require("../Data.Semiring");
-var Data_Show = require("../Data.Show");
 var Data_Tuple = require("../Data.Tuple");
 var Data_Unit = require("../Data.Unit");
 var Debug_Trace = require("../Debug.Trace");
+var Fingering = require("../Fingering");
 var Fret = require("../Fret");
 var Graphics_Canvas = require("../Graphics.Canvas");
 var Halogen = require("../Halogen");
@@ -37,8 +34,10 @@ var Network_HTTP_Affjax = require("../Network.HTTP.Affjax");
 var Node_FS = require("../Node.FS");
 var Prelude = require("../Prelude");
 var Reader = require("../Reader");
+var UI_ChordDiagram = require("../UI.ChordDiagram");
 var UI_FFTypes = require("../UI.FFTypes");
 var UI_GuitarComponent = require("../UI.GuitarComponent");
+var UI_Queue = require("../UI.Queue");
 var selector = "#content #guitar-component";
 var default_neck_data = {
     x_offset: 0.0,
@@ -51,7 +50,7 @@ var calc_neck_data = function (element) {
     return function __do() {
         var v = DOM_HTML_HTMLElement.offsetWidth(element)();
         return {
-            x_offset: 10.0,
+            x_offset: 20.0,
             y_offset: 20.0,
             width: v,
             height: v * 0.15,
@@ -64,17 +63,49 @@ var await_guitar = Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_
         return Data_Maybe.maybe(Control_Monad_Error_Class.throwError(Control_Monad_Aff.monadThrowAff)(Control_Monad_Eff_Exception.error("Could not find element: " + selector)))(Control_Applicative.pure(Control_Monad_Aff.applicativeAff))(v);
     });
 });
-var main = Data_Functor["void"](Control_Monad_Eff.functorEff)(Halogen_Aff_Util.runHalogenAff(Control_Bind.bind(Control_Monad_Aff.bindAff)(await_guitar)(function (v) {
-    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(calc_neck_data(v)))(function (v1) {
-        return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_GuitarComponent.guitar_component)(v1)(v))(function (v2) {
-            return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(Control_Monad_Eff_Console.log(Data_Show.show(Data_Show.showNumber)(v1.width))))(function () {
-                return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(Control_Monad_Eff_Console.log(Data_Show.show(Data_Show.showNumber)(v1.height))))(function () {
-                    return v2.query(new UI_GuitarComponent.Initialise(Data_Unit.unit));
+var main = (function () {
+    var input = {
+        limit: 5,
+        component: UI_ChordDiagram.chord_diagram
+    };
+    var dims = {
+        width: 150.0,
+        height: 150.0
+    };
+    var cons = function (chord) {
+        return new UI_Queue.Cons({
+            fingering: chord,
+            dimensions: dims
+        }, Data_Unit.unit);
+    };
+    var cmaj = {
+        e4: new Data_Maybe.Just(3),
+        b3: new Data_Maybe.Just(5),
+        g3: new Data_Maybe.Just(5),
+        d3: new Data_Maybe.Just(5),
+        a2: new Data_Maybe.Just(3),
+        e2: Data_Maybe.Nothing.value
+    };
+    var amin = {
+        e4: new Data_Maybe.Just(0),
+        b3: new Data_Maybe.Just(1),
+        g3: new Data_Maybe.Just(2),
+        d3: new Data_Maybe.Just(2),
+        a2: new Data_Maybe.Just(0),
+        e2: Data_Maybe.Nothing.value
+    };
+    return Data_Functor["void"](Control_Monad_Eff.functorEff)(Halogen_Aff_Util.runHalogenAff(Control_Bind.bind(Control_Monad_Aff.bindAff)(await_guitar)(function (v) {
+        return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(calc_neck_data(v)))(function (v1) {
+            return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_Queue.ui_queue)(input)(v))(function (v2) {
+                return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(v2.query(cons(cmaj)))(function () {
+                    return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(v2.query(cons(amin)))(function () {
+                        return Control_Applicative.pure(Control_Monad_Aff.applicativeAff)(Data_Unit.unit);
+                    });
                 });
             });
         });
-    });
-})));
+    })));
+})();
 module.exports = {
     default_neck_data: default_neck_data,
     selector: selector,

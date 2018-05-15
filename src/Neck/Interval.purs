@@ -5,7 +5,9 @@ module Interval (
   is_degenerate,
   in_interval,
   within,
-  singleton
+  singleton,
+  inf,
+  sup
 ) where
 
 import Data.Foldable
@@ -13,6 +15,7 @@ import Data.Maybe
 import Prelude
 
 import Control.Monad.Eff.AVar (AVarStatus(..))
+import DOM.HTML.HTMLMetaElement (setHttpEquiv)
 import Data.Lattice as L
 
 data Interval a = Interval { min :: a, max :: a } | EmptyInterval
@@ -78,3 +81,11 @@ within :: forall a. Ord a => Interval a -> Interval a -> Boolean
 within (Interval x) (Interval y) = y.min <= x.min && x.max <= y.max
 within x EmptyInterval = false
 within EmptyInterval _ = true
+
+inf :: Interval ~> Maybe
+inf EmptyInterval = Nothing
+inf (Interval i)  = Just i.min
+
+sup :: Interval ~> Maybe
+sup EmptyInterval = Nothing
+sup (Interval i)  = Just i.max

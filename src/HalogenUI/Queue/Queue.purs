@@ -23,17 +23,17 @@ data Query i o a
 
 type Input g i o m =
   { limit :: Int
-  , component :: H.Component HH.HTML g i o m
-  }
+  , component :: H.Component HH.HTML g i o m }
 
-type Message = Void
+data Output o =
+  ChildOutput o
 
 type State g i o m =
   { queue :: Q.LimitQueue (ChildType g i o m)
   , component :: H.Component HH.HTML g i o m
   , acc :: Int }
 
-ui_queue :: forall g i o m. H.Component HH.HTML (Query i o) (Input g i o m) o m
+ui_queue :: forall g i o m. H.Component HH.HTML (Query i o) (Input g i o m) (Output o) m
 ui_queue = H.parentComponent
   { initialState: initial
   , render
@@ -55,7 +55,7 @@ ui_queue = H.parentComponent
         [ HP.class_ (ClassName "queue-ui") ]
         (Q.toArray state.queue)
 
-  eval :: Query i o ~> H.ParentDSL (State g i o m) (Query i o) g Slot o m
+  eval :: Query i o ~> H.ParentDSL (State g i o m) (Query i o) g Slot (Output o) m
   eval = case _ of
     Cons input a -> do
       state <- H.get
@@ -63,5 +63,8 @@ ui_queue = H.parentComponent
       H.put $ state { queue = Q.insert child state.queue, acc = state.acc + 1 }
       pure a
     Unsnoc a -> pure a
-    ChildMessage output a -> pure a
+    ChildMessage output a -> do
+      H.raise (ChildOutput output)
+      pure a
 
+-- (c a b) -> (a -> d) -> (b -> e) -> (c d e)

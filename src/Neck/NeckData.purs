@@ -9,6 +9,7 @@ import Fret
 import Point
 import Prelude
 
+import Data.Bifunctor (bimap)
 import Data.Int (round, toNumber)
 import Math (pow)
 
@@ -39,9 +40,8 @@ str_y neck y = neck.y_offset + (y * 2.0 + 1.0) * h / 12.0
   where h = neck.height
 
 neck_transformation :: NeckData -> Transformation
-neck_transformation neck (Point p) = point (fret_x neck p.x) (str_y neck  p.y)
+neck_transformation neck = bimap (fret_x neck) (str_y neck)
 
 fret_transformation :: NeckData -> Transformation
-fret_transformation neck (Point p) =
-  point (fret_marker neck (Fret $ round p.x)) (str_y neck p.y)
+fret_transformation neck = bimap (fret_marker neck <<< Fret <<< round) (str_y neck)
 

@@ -20,3 +20,6 @@ instance semiring_fret :: Semiring Fret where
   mul (Fret x) (Fret y) = Fret (x * y)
 instance ring_fret :: Ring Fret where
   sub (Fret x) (Fret y) = Fret (x - y)
+
+unfret :: Fret -> Int
+unfret (Fret x) = x
