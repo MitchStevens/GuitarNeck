@@ -17,35 +17,34 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import UI.ChordDiagram (chord_diagram)
+import UI.ChordDiagram.Types (default_dimensions)
 import UI.ChordDiagram.Types as CD
 import UI.ChordInput as CI
-import UI.GuitarNeck as GN
+import UI.GuitarNeck (guitar_neck)
+import UI.GuitarNeck.Types as GN
 import UI.Queue as Q
 
 type ChildQuery = Coproduct3 GN.Query CI.Query (Q.Query CD.Input CD.Output)
 type ChildSlot  = Either3 Unit Unit Unit
 
-type Message = Void
 type Input = NeckData
+type Output = Void
 type State =
   { neck_data :: NeckData
   , num_fingerings :: Int
   }
 
 data Query a
-  = GuitarNeckMessage GN.Message a
-  | ChordInputMessage CI.Message a
-  | ChordQueueMessage (Q.Output CD.Output) a
-  | Initialise a
+  = GuitarNeckOutput GN.Output a
+  | ChordInputOutput CI.Message a
+  | ChordQueueOutput (Q.Output CD.Output) a
 
-guitar_component :: forall e. H.Component HH.HTML Query Input Message (AffM e)
-guitar_component = H.lifecycleParentComponent 
+guitar_component :: forall e. H.Component HH.HTML Query Input Output (AffM e)
+guitar_component = H.parentComponent 
   { initialState: initial
   , render
   , eval
-  , receiver: const Nothing
-  , initializer: Just (Initialise unit)
-  , finalizer: Nothing }
+  , receiver: const Nothing }
   where
 
   initial :: Input -> State
@@ -54,26 +53,26 @@ guitar_component = H.lifecycleParentComponent
   render :: State -> H.ParentHTML Query ChildQuery ChildSlot (AffM e)
   render state = 
     HH.div [ HP.id_ "guitar" ]
-      [ HH.slot' CP.cp1 unit GN.guitar_neck
-          state.neck_data (HE.input GuitarNeckMessage)
+      [ HH.slot' CP.cp1 unit guitar_neck
+          state.neck_data (HE.input GuitarNeckOutput)
       , HH.slot' CP.cp2 unit CI.chord_input
-          unit (HE.input ChordInputMessage)
+          unit (HE.input ChordInputOutput)
       , HH.div_ [ HH.text (show state.num_fingerings) ]
       , HH.slot' CP.cp3 unit Q.ui_queue
-          { limit: 3, component: chord_diagram } (HE.input ChordQueueMessage)
+          { limit: 3, component: chord_diagram } (HE.input ChordQueueOutput)
     ]
 
   eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Void (AffM e)
   eval = case _ of
-    GuitarNeckMessage (GN.ClickedFingering fing) a -> do
+    GuitarNeckOutput (GN.ClickedFingering fing) a -> do
       H.liftEff $ log (show fing)
+      let x = { fingering: fing
+              , name: "Chord"
+              , dimensions: default_dimensions }
+      _ <- H.query' CP.cp3 unit (Q.Cons x unit)
       pure a
-    GuitarNeckMessage _ a -> pure a
-    ChordInputMessage (CI.ChangedState state) a -> do
+    GuitarNeckOutput _ a -> pure a
+    ChordInputOutput (CI.ChangedState state) a -> do
       _ <- H.query' CP.cp1 unit (GN.SetChord state unit)
       pure a
-    ChordQueueMessage _ a -> pure a
-    Initialise a -> do
-      _ <- H.query' CP.cp1 unit (GN.PaintNeck unit)
-      pure a
-      
+    ChordQueueOutput _ a -> pure a

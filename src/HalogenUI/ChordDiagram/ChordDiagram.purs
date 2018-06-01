@@ -46,6 +46,6 @@ chord_diagram = H.lifecycleComponent
   eval = case _ of
     Redraw a -> do
       state <- H.get
-      H.liftEff $ paint_chord_diagram state (show state.fingering)
+      H.liftEff $  paint_chord_diagram state (show state.fingering)
       pure a
 

@@ -13,6 +13,7 @@ var Data_EuclideanRing = require("../Data.EuclideanRing");
 var Data_Foldable = require("../Data.Foldable");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
+var Data_HeytingAlgebra = require("../Data.HeytingAlgebra");
 var Data_Int = require("../Data.Int");
 var Data_Lattice = require("../Data.Lattice");
 var Data_Maybe = require("../Data.Maybe");
@@ -48,6 +49,11 @@ var to_points = function (fingering) {
         };
     };
     return Data_Array.catMaybes(Data_Array.zipWith(maybe_point)(xs)(Data_Array.range(0)(5)));
+};
+var is_open = function ($24) {
+    return Data_Foldable.any(Data_Foldable.foldableArray)(Data_HeytingAlgebra.heytingAlgebraBoolean)(function ($25) {
+        return 0.0 === Data_Tuple.fst($25);
+    })(to_points($24));
 };
 var get_closest = function (dictFoldable) {
     return function (neck_data) {
@@ -189,6 +195,7 @@ module.exports = {
     Fingering: Fingering,
     shift_fingering: shift_fingering,
     to_array: to_array,
+    is_open: is_open,
     fret_interval: fret_interval,
     cache_centeroid: cache_centeroid,
     to_points: to_points,

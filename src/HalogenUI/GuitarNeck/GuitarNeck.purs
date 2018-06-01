@@ -1,84 +1,56 @@
-module UI.GuitarNeck where
+module UI.GuitarNeck (
+  guitar_neck
+) where
 
-import DOM
-import DOM.HTML
-import DOM.HTML.HTMLElement
-import DOM.HTML.Location
-import DOM.HTML.Types
-import DOM.HTML.Window
-
+import Data.Either
+import Data.Foldable
+import Data.StrMap
+import Data.Tuple
+import Debug.Trace
 import Fingering
-import Fret
-import Graphics.Canvas
 import Music
-import NeckData
-import Network.HTTP.Affjax
-import Node.FS
 import Point
 import Prelude
 import Reader
 import UI.FFTypes
-import UI.GuitarNeckCanvas
+import UI.GuitarNeck.Canvas
+import UI.GuitarNeck.Types
 
+import CSS as C
 import Control.Apply (lift2)
-import Control.Biapplicative (bipure)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Console (log)
-
+import DOM.Event.MouseEvent as ME
+import DOM.HTML (window)
+import DOM.HTML.HTMLElement (offsetLeft, offsetTop)
+import DOM.HTML.Location (origin)
+import DOM.HTML.Types (HTMLElement)
+import DOM.HTML.Window (location)
+import DOM.Node.ParentNode (QuerySelector(..))
 import Data.Array (index, length, mapMaybe, (..))
-import Data.Either
-import Data.Foldable
 import Data.Int (toNumber, ceil)
 import Data.Maybe (Maybe(..), fromMaybe, maybe, isJust)
-import Data.StrMap
-import Debug.Trace
-import Data.Tuple
-
-import DOM.Event.MouseEvent as ME
-import DOM.Event.Types as Event
-import DOM.Node.ParentNode (QuerySelector(..))
-
 import Halogen as H
 import Halogen.Aff (selectElement)
-import Halogen.Component.ChildPath as CP
+import Halogen.HTML (text)
 import Halogen.HTML as HH
+import Halogen.HTML.CSS as HC
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-
+import Svg.Attributes (viewBox)
+import Svg.Elements (svg)
 import Text.Parsing.Parser (ParseError)
+import UI.GuitarNeck.DrawSvg (draw_neck)
 
-type Input = NeckData
-
-type State =
-  { neck_data :: NeckData
-  , curr_chord :: Maybe Chord
-  , curr_fingerings :: Array FingeringData
-  , focused :: Maybe Int
-  , fingering_cache :: FingeringCache }
-
-data Query a
-  = PaintNeck a
-  | WipeNeck a
-  | ClearAll a
-  | MouseMove Event.MouseEvent a
-  | MouseEnter a
-  | MouseLeave a
-  | MouseClick a
-  | SetChord (Either ParseError Chord) a
-  | Display a
-
-data Message
-  = ClickedFingering Fingering
-  | FocusedFingering Fingering
-
-guitar_neck :: forall e. H.Component HH.HTML Query Input Message (AffM e)
-guitar_neck =
-  H.component
-    { initialState: initial
-    , render
-    , eval
-    , receiver: const Nothing
-    }
+guitar_neck :: forall e. H.Component HH.HTML Query Input Output (AffM e)
+guitar_neck = H.lifecycleComponent
+  { initialState: initial
+  , render
+  , eval
+  , receiver: const Nothing
+  , initializer: Just (PaintNeck unit)
+  , finalizer: Nothing
+  }
   where
 
   initial :: Input -> State
@@ -93,38 +65,26 @@ guitar_neck =
   render :: State -> H.ComponentHTML Query
   render state =
     let
-      width  = state.neck_data.width  + state.neck_data.x_offset
-      height = state.neck_data.height + state.neck_data.y_offset
-      num_fingerings = if isJust state.curr_chord
-        then "Found "<>(show $ length state.curr_fingerings)<>" chords."
-        else "Couldn't find any chord shapes."
+      width  = state.neck_data.width
+      height = state.neck_data.height
     in
       HH.div
-        [ HP.id_ "both-canvases" ]
-        [ HH.canvas
-          [ HP.id_ "guitar_neck"
-          , HP.width  $ ceil width
-          , HP.height $ ceil height
-          ]
-        , HH.canvas
-          [ HP.id_ "guitar_notes"
-          , HP.width  $ ceil width
-          , HP.height $ ceil height
-          , HE.onMouseMove  (HE.input MouseMove)
-          , HE.onMouseEnter (HE.input_ MouseEnter)
-          , HE.onMouseLeave (HE.input_ MouseLeave)
-          , HE.onClick      (HE.input_ MouseClick)
-          ]
+        [ HP.id_ "guitar-neck"
+        , HE.onMouseMove  (HE.input MouseMove)
+        , HE.onMouseEnter (HE.input_ MouseEnter)
+        , HE.onMouseLeave (HE.input_ MouseLeave)
+        , HE.onClick      (HE.input_ MouseClick)
         ]
+        [ draw_neck state.neck_data ]
 
-  eval :: Query ~> H.ComponentDSL State Query Message (AffM e)
+  eval :: Query ~> H.ComponentDSL State Query Output (AffM e)
   eval = case _ of
     PaintNeck a -> do
-      state <- H.get
-      url <- H.liftEff $ window >>= location >>= origin
-      fingerings <- H.liftAff $ read_fingerings url
-      H.liftEff $ paint_neck state.neck_data
-      H.put $ state { fingering_cache = fingerings }
+      --state <- H.get
+      --url <- H.liftEff $ window >>= location -->>= origin
+      --fingerings <- H.liftAff $ read_fingerings --url
+      --H.liftEff $ paint_neck state.neck_data
+      --H.put $ state { fingering_cache = --fingerings }
       pure a
     WipeNeck a -> do
       H.liftEff wipe_neck
@@ -178,7 +138,7 @@ next_state either state = case either of
       , focused = Nothing }
 
 calc_offset :: forall e. HTMLElement -> EffM e Point
-calc_offset element = lift2 bipure (offsetLeft element) (offsetTop element)
+calc_offset element = lift2 Tuple (offsetLeft element) (offsetTop element)
 
 focused_fingering :: State -> Maybe Fingering
 focused_fingering state = do

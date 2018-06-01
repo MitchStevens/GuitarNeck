@@ -22,9 +22,13 @@
     "purescript-lattice": "^0.3.0",
     "purescript-sequences": "^1.0.3",
     "purescript-profunctor-lenses": "^3.8.0",
-    "purescript-free-canvas": "^3.0.0"
+    "purescript-free-canvas": "^3.0.0",
+    "purescript-halogen-css": "^7.0.0",
+    "purescript-css": "^3.4.0",
+    "purescript-halogen-svg": "github.com/kwohlfahrt/purescript-halogen-svg"
   },
   "devDependencies": {
-    "purescript-psci-support": "^3.0.0"
+    "purescript-psci-support": "^3.0.0",
+    "purescript-exceptions": "^3.0.0"
   }
 }

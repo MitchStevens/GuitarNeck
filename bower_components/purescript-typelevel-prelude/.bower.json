@@ -20,12 +20,12 @@
     "purescript-symbols": "^3.0.0",
     "purescript-type-equality": "^2.0.0"
   },
-  "version": "2.6.0",
-  "_release": "2.6.0",
+  "version": "2.7.0",
+  "_release": "2.7.0",
   "_resolution": {
     "type": "version",
-    "tag": "v2.6.0",
-    "commit": "979f06ae3758c145a9f15d877ed0d7c148ece243"
+    "tag": "v2.7.0",
+    "commit": "d2c4a22da5dc8a226fb3e5a517c607af14453d31"
   },
   "_source": "https://github.com/purescript/purescript-typelevel-prelude.git",
   "_target": "^2.3.1",

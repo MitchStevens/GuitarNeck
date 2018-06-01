@@ -33,6 +33,6 @@
     "commit": "8a18ad9d421b748f158c45d454c019bf4bf57028"
   },
   "_source": "https://github.com/purescript/purescript-record.git",
-  "_target": "^0.2.0",
+  "_target": "^0.2.4",
   "_originalSource": "purescript-record"
 }

@@ -117,6 +117,7 @@ var showNonEmptyArray = function (dictShow) {
         return "(NonEmptyArray " + (Data_Show.show(Data_Show.showArray(dictShow))(v) + ")");
     });
 };
+var semigroupNonEmptyArray = Data_Semigroup.semigroupArray;
 var replicate = function (i) {
     return function (x) {
         return NonEmptyArray(Data_Array.replicate(Data_Ord.max(Data_Ord.ordInt)(1)(i))(x));
@@ -178,7 +179,7 @@ var fromArray = function (xs) {
     if (Data_Boolean.otherwise) {
         return Data_Maybe.Nothing.value;
     };
-    throw new Error("Failed pattern match at Data.Array.NonEmpty line 174, column 1 - line 174, column 58: " + [ xs.constructor.name ]);
+    throw new Error("Failed pattern match at Data.Array.NonEmpty line 176, column 1 - line 176, column 58: " + [ xs.constructor.name ]);
 };
 var fromFoldable = function (dictFoldable) {
     return function ($56) {
@@ -489,6 +490,7 @@ module.exports = {
     eq1NonEmptyArray: eq1NonEmptyArray,
     ordNonEmptyArray: ordNonEmptyArray,
     ord1NonEmptyArray: ord1NonEmptyArray,
+    semigroupNonEmptyArray: semigroupNonEmptyArray,
     functorNonEmptyArray: functorNonEmptyArray,
     functorWithIndexNonEmptyArray: functorWithIndexNonEmptyArray,
     foldableNonEmptyArray: foldableNonEmptyArray,

@@ -30,12 +30,12 @@
     "purescript-console": "^3.0.0",
     "purescript-const": "^3.0.0"
   },
-  "version": "4.3.0",
-  "_release": "4.3.0",
+  "version": "4.4.0",
+  "_release": "4.4.0",
   "_resolution": {
     "type": "version",
-    "tag": "v4.3.0",
-    "commit": "c87fdee9458c6181d68bbabb4fbdec9713b4d919"
+    "tag": "v4.4.0",
+    "commit": "027811f9fdc3a85e7f0ce36788c0d439d9b4216e"
   },
   "_source": "https://github.com/purescript/purescript-arrays.git",
   "_target": "^4.0.0",

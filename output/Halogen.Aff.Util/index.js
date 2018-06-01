@@ -15,7 +15,6 @@ var DOM_Event_Types = require("../DOM.Event.Types");
 var DOM_HTML = require("../DOM.HTML");
 var DOM_HTML_Document = require("../DOM.HTML.Document");
 var DOM_HTML_Document_ReadyState = require("../DOM.HTML.Document.ReadyState");
-var DOM_HTML_Event_EventTypes = require("../DOM.HTML.Event.EventTypes");
 var DOM_HTML_Types = require("../DOM.HTML.Types");
 var DOM_HTML_Window = require("../DOM.HTML.Window");
 var DOM_Node_ParentNode = require("../DOM.Node.ParentNode");
@@ -28,8 +27,8 @@ var Data_Unit = require("../Data.Unit");
 var Halogen_Aff_Effects = require("../Halogen.Aff.Effects");
 var Prelude = require("../Prelude");
 var selectElement = function (query) {
-    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(Control_Bind.bindFlipped(Control_Monad_Eff.bindEff)(Control_Bind.composeKleisliFlipped(Control_Monad_Eff.bindEff)(function ($13) {
-        return DOM_Node_ParentNode.querySelector(query)(DOM_HTML_Types.htmlDocumentToParentNode($13));
+    return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(Control_Bind.bindFlipped(Control_Monad_Eff.bindEff)(Control_Bind.composeKleisliFlipped(Control_Monad_Eff.bindEff)(function ($12) {
+        return DOM_Node_ParentNode.querySelector(query)(DOM_HTML_Types.htmlDocumentToParentNode($12));
     })(DOM_HTML_Window.document))(DOM_HTML.window)))(function (v) {
         return Control_Applicative.pure(Control_Monad_Aff.applicativeAff)((function () {
             if (v instanceof Data_Maybe.Nothing) {
@@ -44,7 +43,7 @@ var selectElement = function (query) {
 };
 var runHalogenAff = Control_Monad_Aff.runAff_(Data_Either.either(Control_Monad_Eff_Exception.throwException)(Data_Function["const"](Control_Applicative.pure(Control_Monad_Eff.applicativeEff)(Data_Unit.unit))));
 var awaitLoad = Control_Monad_Aff.makeAff(function (callback) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Eff_Class.monadEffEff)(function __do() {
+    return function __do() {
         var v = Control_Bind.bindFlipped(Control_Monad_Eff.bindEff)(DOM_HTML_Document.readyState)(Control_Bind.bindFlipped(Control_Monad_Eff.bindEff)(DOM_HTML_Window.document)(DOM_HTML.window))();
         if (v instanceof DOM_HTML_Document_ReadyState.Loading) {
             var v1 = Data_Functor.map(Control_Monad_Eff.functorEff)(DOM_HTML_Types.windowToEventTarget)(DOM_HTML.window)();
@@ -52,13 +51,11 @@ var awaitLoad = Control_Monad_Aff.makeAff(function (callback) {
                 return callback(new Data_Either.Right(Data_Unit.unit));
             });
             DOM_Event_EventTarget.addEventListener("DOMContentLoaded")(listener)(false)(v1)();
-            return function (v2) {
-                return Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(DOM_Event_EventTarget.removeEventListener(DOM_HTML_Event_EventTypes.load)(listener)(false)(v1));
-            };
+            return Control_Monad_Aff.effCanceler(DOM_Event_EventTarget.removeEventListener("DOMContentLoaded")(listener)(false)(v1));
         };
         callback(new Data_Either.Right(Data_Unit.unit))();
         return Control_Monad_Aff.nonCanceler;
-    });
+    };
 });
 var awaitBody = Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(awaitLoad)(function () {
     return Control_Bind.bind(Control_Monad_Aff.bindAff)(selectElement("body"))(function (v) {

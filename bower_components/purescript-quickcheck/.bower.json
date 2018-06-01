@@ -20,7 +20,7 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-arrays": "^4.0.0",
+    "purescript-arrays": "^4.3.0",
     "purescript-console": "^3.0.0",
     "purescript-either": "^3.0.0",
     "purescript-enums": "^3.0.0",
@@ -30,7 +30,7 @@
     "purescript-nonempty": "^4.0.0",
     "purescript-partial": "^1.2.0",
     "purescript-random": "^3.0.0",
-    "purescript-strings": "^3.0.0",
+    "purescript-strings": "^3.5.0",
     "purescript-transformers": "^3.0.0",
     "purescript-generics-rep": "^5.0.0",
     "purescript-typelevel-prelude": "^2.4.0",
@@ -39,12 +39,12 @@
   "devDependencies": {
     "purescript-assert": "^3.0.0"
   },
-  "version": "4.6.2",
-  "_release": "4.6.2",
+  "version": "4.7.0",
+  "_release": "4.7.0",
   "_resolution": {
     "type": "version",
-    "tag": "v4.6.2",
-    "commit": "ba4826550782b61ea512de2568d2ea130e27b3ad"
+    "tag": "v4.7.0",
+    "commit": "2c840b82e433bc5bf0942d6c007cb2551ab21522"
   },
   "_source": "https://github.com/purescript/purescript-quickcheck.git",
   "_target": "^4.0.0",

@@ -37,12 +37,12 @@
     "purescript-phantom": "^2.0.0",
     "purescript-exitcodes": "^3.0.0"
   },
-  "version": "4.15.0",
-  "_release": "4.15.0",
+  "version": "4.16.0",
+  "_release": "4.16.0",
   "_resolution": {
     "type": "version",
-    "tag": "v4.15.0",
-    "commit": "13e7a35de52f7379cb3f8e1115b1063ad75fa25e"
+    "tag": "v4.16.0",
+    "commit": "cfcd0c5bdf303e36ab3938fd1a050106fa11dc09"
   },
   "_source": "https://github.com/joneshf/purescript-dom.git",
   "_target": "^4.10.0",

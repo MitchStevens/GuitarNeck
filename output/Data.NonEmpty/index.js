@@ -10,6 +10,7 @@ var Control_Semigroupoid = require("../Control.Semigroupoid");
 var Data_Eq = require("../Data.Eq");
 var Data_Foldable = require("../Data.Foldable");
 var Data_FoldableWithIndex = require("../Data.FoldableWithIndex");
+var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
 var Data_FunctorWithIndex = require("../Data.FunctorWithIndex");
 var Data_HeytingAlgebra = require("../Data.HeytingAlgebra");
@@ -21,6 +22,9 @@ var Data_Semigroup_Foldable = require("../Data.Semigroup.Foldable");
 var Data_Show = require("../Data.Show");
 var Data_Traversable = require("../Data.Traversable");
 var Data_TraversableWithIndex = require("../Data.TraversableWithIndex");
+var Data_Tuple = require("../Data.Tuple");
+var Data_Unfoldable = require("../Data.Unfoldable");
+var Data_Unfoldable1 = require("../Data.Unfoldable1");
 var Prelude = require("../Prelude");
 var NonEmpty = (function () {
     function NonEmpty(value0, value1) {
@@ -34,6 +38,13 @@ var NonEmpty = (function () {
     };
     return NonEmpty;
 })();
+var unfoldable1NonEmpty = function (dictUnfoldable) {
+    return new Data_Unfoldable1.Unfoldable1(function (f) {
+        return function (b) {
+            return Data_Tuple.uncurry(NonEmpty.create)(Data_Functor.map(Data_Tuple.functorTuple)(Data_Unfoldable.unfoldr(dictUnfoldable)(Data_Functor.map(Data_Maybe.functorMaybe)(f)))(f(b)));
+        };
+    });
+};
 var tail = function (v) {
     return v.value1;
 };
@@ -69,8 +80,8 @@ var functorWithIndex = function (dictFunctorWithIndex) {
         return functorNonEmpty(dictFunctorWithIndex.Functor0());
     }, function (f) {
         return function (v) {
-            return new NonEmpty(f(Data_Maybe.Nothing.value)(v.value0), Data_FunctorWithIndex.mapWithIndex(dictFunctorWithIndex)(function ($139) {
-                return f(Data_Maybe.Just.create($139));
+            return new NonEmpty(f(Data_Maybe.Nothing.value)(v.value0), Data_FunctorWithIndex.mapWithIndex(dictFunctorWithIndex)(function ($140) {
+                return f(Data_Maybe.Just.create($140));
             })(v.value1));
         };
     });
@@ -114,24 +125,24 @@ var foldableWithIndexNonEmpty = function (dictFoldableWithIndex) {
     }, function (dictMonoid) {
         return function (f) {
             return function (v) {
-                return Data_Semigroup.append(dictMonoid.Semigroup0())(f(Data_Maybe.Nothing.value)(v.value0))(Data_FoldableWithIndex.foldMapWithIndex(dictFoldableWithIndex)(dictMonoid)(function ($140) {
-                    return f(Data_Maybe.Just.create($140));
+                return Data_Semigroup.append(dictMonoid.Semigroup0())(f(Data_Maybe.Nothing.value)(v.value0))(Data_FoldableWithIndex.foldMapWithIndex(dictFoldableWithIndex)(dictMonoid)(function ($141) {
+                    return f(Data_Maybe.Just.create($141));
                 })(v.value1));
             };
         };
     }, function (f) {
         return function (b) {
             return function (v) {
-                return Data_FoldableWithIndex.foldlWithIndex(dictFoldableWithIndex)(function ($141) {
-                    return f(Data_Maybe.Just.create($141));
+                return Data_FoldableWithIndex.foldlWithIndex(dictFoldableWithIndex)(function ($142) {
+                    return f(Data_Maybe.Just.create($142));
                 })(f(Data_Maybe.Nothing.value)(b)(v.value0))(v.value1);
             };
         };
     }, function (f) {
         return function (b) {
             return function (v) {
-                return f(Data_Maybe.Nothing.value)(v.value0)(Data_FoldableWithIndex.foldrWithIndex(dictFoldableWithIndex)(function ($142) {
-                    return f(Data_Maybe.Just.create($142));
+                return f(Data_Maybe.Nothing.value)(v.value0)(Data_FoldableWithIndex.foldrWithIndex(dictFoldableWithIndex)(function ($143) {
+                    return f(Data_Maybe.Just.create($143));
                 })(b)(v.value1));
             };
         };
@@ -164,8 +175,8 @@ var traversableWithIndexNonEmpty = function (dictTraversableWithIndex) {
     }, function (dictApplicative) {
         return function (f) {
             return function (v) {
-                return Control_Apply.apply(dictApplicative.Apply0())(Data_Functor.map((dictApplicative.Apply0()).Functor0())(NonEmpty.create)(f(Data_Maybe.Nothing.value)(v.value0)))(Data_TraversableWithIndex.traverseWithIndex(dictTraversableWithIndex)(dictApplicative)(function ($143) {
-                    return f(Data_Maybe.Just.create($143));
+                return Control_Apply.apply(dictApplicative.Apply0())(Data_Functor.map((dictApplicative.Apply0()).Functor0())(NonEmpty.create)(f(Data_Maybe.Nothing.value)(v.value0)))(Data_TraversableWithIndex.traverseWithIndex(dictTraversableWithIndex)(dictApplicative)(function ($144) {
+                    return f(Data_Maybe.Just.create($144));
                 })(v.value1));
             };
         };
@@ -255,5 +266,6 @@ module.exports = {
     foldableWithIndexNonEmpty: foldableWithIndexNonEmpty,
     traversableNonEmpty: traversableNonEmpty,
     traversableWithIndexNonEmpty: traversableWithIndexNonEmpty,
-    foldable1NonEmpty: foldable1NonEmpty
+    foldable1NonEmpty: foldable1NonEmpty,
+    unfoldable1NonEmpty: unfoldable1NonEmpty
 };

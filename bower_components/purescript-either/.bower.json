@@ -20,12 +20,12 @@
     "purescript-foldable-traversable": "^3.0.0",
     "purescript-prelude": "^3.0.0"
   },
-  "version": "3.1.0",
-  "_release": "3.1.0",
+  "version": "3.2.0",
+  "_release": "3.2.0",
   "_resolution": {
     "type": "version",
-    "tag": "v3.1.0",
-    "commit": "ceb6a147debe2a1b9af0732b9ee1f4a76d0c7c49"
+    "tag": "v3.2.0",
+    "commit": "c8a4c717c10080f907c2ddea0c4d8a3ef6134eca"
   },
   "_source": "https://github.com/purescript/purescript-either.git",
   "_target": "^3.0.0",

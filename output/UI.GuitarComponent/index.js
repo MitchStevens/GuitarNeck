@@ -34,58 +34,50 @@ var UI_ChordDiagram_Types = require("../UI.ChordDiagram.Types");
 var UI_ChordInput = require("../UI.ChordInput");
 var UI_FFTypes = require("../UI.FFTypes");
 var UI_GuitarNeck = require("../UI.GuitarNeck");
+var UI_GuitarNeck_Types = require("../UI.GuitarNeck.Types");
 var UI_Queue = require("../UI.Queue");
-var GuitarNeckMessage = (function () {
-    function GuitarNeckMessage(value0, value1) {
+var GuitarNeckOutput = (function () {
+    function GuitarNeckOutput(value0, value1) {
         this.value0 = value0;
         this.value1 = value1;
     };
-    GuitarNeckMessage.create = function (value0) {
+    GuitarNeckOutput.create = function (value0) {
         return function (value1) {
-            return new GuitarNeckMessage(value0, value1);
+            return new GuitarNeckOutput(value0, value1);
         };
     };
-    return GuitarNeckMessage;
+    return GuitarNeckOutput;
 })();
-var ChordInputMessage = (function () {
-    function ChordInputMessage(value0, value1) {
+var ChordInputOutput = (function () {
+    function ChordInputOutput(value0, value1) {
         this.value0 = value0;
         this.value1 = value1;
     };
-    ChordInputMessage.create = function (value0) {
+    ChordInputOutput.create = function (value0) {
         return function (value1) {
-            return new ChordInputMessage(value0, value1);
+            return new ChordInputOutput(value0, value1);
         };
     };
-    return ChordInputMessage;
+    return ChordInputOutput;
 })();
-var ChordQueueMessage = (function () {
-    function ChordQueueMessage(value0, value1) {
+var ChordQueueOutput = (function () {
+    function ChordQueueOutput(value0, value1) {
         this.value0 = value0;
         this.value1 = value1;
     };
-    ChordQueueMessage.create = function (value0) {
+    ChordQueueOutput.create = function (value0) {
         return function (value1) {
-            return new ChordQueueMessage(value0, value1);
+            return new ChordQueueOutput(value0, value1);
         };
     };
-    return ChordQueueMessage;
-})();
-var Initialise = (function () {
-    function Initialise(value0) {
-        this.value0 = value0;
-    };
-    Initialise.create = function (value0) {
-        return new Initialise(value0);
-    };
-    return Initialise;
+    return ChordQueueOutput;
 })();
 var guitar_component = (function () {
     var render = function (state) {
-        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.id_("guitar") ])([ Halogen_HTML["slot'"](Halogen_Component_ChildPath.cp1)(Data_Unit.unit)(UI_GuitarNeck.guitar_neck)(state.neck_data)(Halogen_HTML_Events.input(GuitarNeckMessage.create)), Halogen_HTML["slot'"](Halogen_Component_ChildPath.cp2)(Data_Unit.unit)(UI_ChordInput.chord_input)(Data_Unit.unit)(Halogen_HTML_Events.input(ChordInputMessage.create)), Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(Data_Show.show(Data_Show.showInt)(state.num_fingerings)) ]), Halogen_HTML["slot'"](Halogen_Component_ChildPath.cp3)(Data_Unit.unit)(UI_Queue.ui_queue)({
+        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.id_("guitar") ])([ Halogen_HTML["slot'"](Halogen_Component_ChildPath.cp1)(Data_Unit.unit)(UI_GuitarNeck.guitar_neck)(state.neck_data)(Halogen_HTML_Events.input(GuitarNeckOutput.create)), Halogen_HTML["slot'"](Halogen_Component_ChildPath.cp2)(Data_Unit.unit)(UI_ChordInput.chord_input)(Data_Unit.unit)(Halogen_HTML_Events.input(ChordInputOutput.create)), Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(Data_Show.show(Data_Show.showInt)(state.num_fingerings)) ]), Halogen_HTML["slot'"](Halogen_Component_ChildPath.cp3)(Data_Unit.unit)(UI_Queue.ui_queue)({
             limit: 3,
             component: UI_ChordDiagram.chord_diagram
-        })(Halogen_HTML_Events.input(ChordQueueMessage.create)) ]);
+        })(Halogen_HTML_Events.input(ChordQueueOutput.create)) ]);
     };
     var initial = function (input) {
         return {
@@ -94,42 +86,41 @@ var guitar_component = (function () {
         };
     };
     var $$eval = function (v) {
-        if (v instanceof GuitarNeckMessage && v.value0 instanceof UI_GuitarNeck.ClickedFingering) {
+        if (v instanceof GuitarNeckOutput && v.value0 instanceof UI_GuitarNeck_Types.ClickedFingering) {
             return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_Eff_Class.liftEff(Halogen_Query_HalogenM.monadEffHalogenM(Control_Monad_Aff.monadEffAff))(Control_Monad_Eff_Console.log(Data_Show.show(Fingering.show_fingering)(v.value0.value0))))(function () {
+                var x = {
+                    fingering: v.value0.value0,
+                    name: "Chord",
+                    dimensions: UI_ChordDiagram_Types.default_dimensions
+                };
+                return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query["query'"](Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Eq.eqVoid))))(Halogen_Component_ChildPath.cp3)(Data_Unit.unit)(new UI_Queue.Cons(x, Data_Unit.unit)))(function (v1) {
+                    return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
+                });
+            });
+        };
+        if (v instanceof GuitarNeckOutput) {
+            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
+        };
+        if (v instanceof ChordInputOutput) {
+            return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query["query'"](Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Eq.eqVoid))))(Halogen_Component_ChildPath.cp1)(Data_Unit.unit)(new UI_GuitarNeck_Types.SetChord(v.value0.value0, Data_Unit.unit)))(function (v1) {
                 return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
             });
         };
-        if (v instanceof GuitarNeckMessage) {
+        if (v instanceof ChordQueueOutput) {
             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
         };
-        if (v instanceof ChordInputMessage) {
-            return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query["query'"](Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Eq.eqVoid))))(Halogen_Component_ChildPath.cp1)(Data_Unit.unit)(new UI_GuitarNeck.SetChord(v.value0.value0, Data_Unit.unit)))(function (v1) {
-                return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
-            });
-        };
-        if (v instanceof ChordQueueMessage) {
-            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
-        };
-        if (v instanceof Initialise) {
-            return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query["query'"](Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Either.eqEither(Data_Eq.eqUnit)(Data_Eq.eqVoid))))(Halogen_Component_ChildPath.cp1)(Data_Unit.unit)(new UI_GuitarNeck.PaintNeck(Data_Unit.unit)))(function (v1) {
-                return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value0);
-            });
-        };
-        throw new Error("Failed pattern match at UI.GuitarComponent line 67, column 10 - line 78, column 12: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at UI.GuitarComponent line 66, column 10 - line 78, column 34: " + [ v.constructor.name ]);
     };
-    return Halogen_Component.lifecycleParentComponent(Data_Either.ordEither(Data_Ord.ordUnit)(Data_Either.ordEither(Data_Ord.ordUnit)(Data_Either.ordEither(Data_Ord.ordUnit)(Data_Ord.ordVoid))))({
+    return Halogen_Component.parentComponent(Data_Either.ordEither(Data_Ord.ordUnit)(Data_Either.ordEither(Data_Ord.ordUnit)(Data_Either.ordEither(Data_Ord.ordUnit)(Data_Ord.ordVoid))))({
         initialState: initial,
         render: render,
         "eval": $$eval,
-        receiver: Data_Function["const"](Data_Maybe.Nothing.value),
-        initializer: new Data_Maybe.Just(new Initialise(Data_Unit.unit)),
-        finalizer: Data_Maybe.Nothing.value
+        receiver: Data_Function["const"](Data_Maybe.Nothing.value)
     });
 })();
 module.exports = {
-    GuitarNeckMessage: GuitarNeckMessage,
-    ChordInputMessage: ChordInputMessage,
-    ChordQueueMessage: ChordQueueMessage,
-    Initialise: Initialise,
+    GuitarNeckOutput: GuitarNeckOutput,
+    ChordInputOutput: ChordInputOutput,
+    ChordQueueOutput: ChordQueueOutput,
     guitar_component: guitar_component
 };

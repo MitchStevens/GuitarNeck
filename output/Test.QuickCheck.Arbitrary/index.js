@@ -4,9 +4,13 @@ var Control_Applicative = require("../Control.Applicative");
 var Control_Apply = require("../Control.Apply");
 var Control_Bind = require("../Control.Bind");
 var Control_Category = require("../Control.Category");
+var Control_Monad_Eff = require("../Control.Monad.Eff");
 var Control_Monad_Gen_Class = require("../Control.Monad.Gen.Class");
 var Control_Monad_Gen_Common = require("../Control.Monad.Gen.Common");
+var Control_Monad_ST = require("../Control.Monad.ST");
 var Control_Semigroupoid = require("../Control.Semigroupoid");
+var Data_Array_NonEmpty = require("../Data.Array.NonEmpty");
+var Data_Array_ST = require("../Data.Array.ST");
 var Data_Char = require("../Data.Char");
 var Data_Either = require("../Data.Either");
 var Data_Foldable = require("../Data.Foldable");
@@ -28,9 +32,11 @@ var Data_Ring = require("../Data.Ring");
 var Data_Semigroup = require("../Data.Semigroup");
 var Data_Semiring = require("../Data.Semiring");
 var Data_String = require("../Data.String");
+var Data_String_NonEmpty = require("../Data.String.NonEmpty");
 var Data_Symbol = require("../Data.Symbol");
 var Data_Tuple = require("../Data.Tuple");
 var Data_Unit = require("../Data.Unit");
+var Partial_Unsafe = require("../Partial.Unsafe");
 var Prelude = require("../Prelude");
 var Test_QuickCheck_Gen = require("../Test.QuickCheck.Gen");
 var Type_Prelude = require("../Type.Prelude");
@@ -71,8 +77,8 @@ var coarbitraryField = function (dictCoarbitrary) {
 var coarbitraryProduct = function (dictCoarbitrary) {
     return function (dictCoarbitrary1) {
         return new Coarbitrary(function (v) {
-            return function ($109) {
-                return coarbitrary(dictCoarbitrary1)(v.value1)(coarbitrary(dictCoarbitrary)(v.value0)($109));
+            return function ($119) {
+                return coarbitrary(dictCoarbitrary1)(v.value1)(coarbitrary(dictCoarbitrary)(v.value0)($119));
             };
         });
     };
@@ -91,7 +97,7 @@ var coarbitrarySum = function (dictCoarbitrary) {
             if (v instanceof Data_Generic_Rep.Inr) {
                 return coarbitrary(dictCoarbitrary1)(v.value0);
             };
-            throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 191, column 1 - line 191, column 83: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 213, column 1 - line 213, column 83: " + [ v.constructor.name ]);
         });
     };
 };
@@ -110,8 +116,8 @@ var coarbUnit = new Coarbitrary(function (v) {
 var coarbTuple = function (dictCoarbitrary) {
     return function (dictCoarbitrary1) {
         return new Coarbitrary(function (v) {
-            return function ($110) {
-                return coarbitrary(dictCoarbitrary1)(v.value1)(coarbitrary(dictCoarbitrary)(v.value0)($110));
+            return function ($120) {
+                return coarbitrary(dictCoarbitrary1)(v.value1)(coarbitrary(dictCoarbitrary)(v.value0)($120));
             };
         });
     };
@@ -126,14 +132,14 @@ var coarbOrdering = new Coarbitrary(function (v) {
     if (v instanceof Data_Ordering.GT) {
         return Test_QuickCheck_Gen.perturbGen(3.0);
     };
-    throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 101, column 1 - line 101, column 47: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 111, column 1 - line 111, column 47: " + [ v.constructor.name ]);
 });
 var coarbNumber = new Coarbitrary(Test_QuickCheck_Gen.perturbGen);
 var coarbNonEmpty = function (dictCoarbitrary) {
     return function (dictCoarbitrary1) {
         return new Coarbitrary(function (v) {
-            return function ($111) {
-                return coarbitrary(dictCoarbitrary)(v.value1)(coarbitrary(dictCoarbitrary1)(v.value0)($111));
+            return function ($121) {
+                return coarbitrary(dictCoarbitrary)(v.value1)(coarbitrary(dictCoarbitrary1)(v.value0)($121));
             };
         });
     };
@@ -146,14 +152,14 @@ var coarbMaybe = function (dictCoarbitrary) {
         if (v instanceof Data_Maybe.Just) {
             return coarbitrary(dictCoarbitrary)(v.value0);
         };
-        throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 129, column 1 - line 129, column 62: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 151, column 1 - line 151, column 62: " + [ v.constructor.name ]);
     });
 };
 var coarbList = function (dictCoarbitrary) {
     return new Coarbitrary(Data_Foldable.foldl(Data_List_Types.foldableList)(function (f) {
         return function (x) {
-            return function ($112) {
-                return f(coarbitrary(dictCoarbitrary)(x)($112));
+            return function ($122) {
+                return f(coarbitrary(dictCoarbitrary)(x)($122));
             };
         };
     })(Control_Category.id(Control_Category.categoryFn)));
@@ -168,8 +174,8 @@ var coarbLazy = function (dictCoarbitrary) {
         return coarbitrary(dictCoarbitrary)(Data_Lazy.force(a));
     });
 };
-var coarbInt = new Coarbitrary(function ($113) {
-    return Test_QuickCheck_Gen.perturbGen(Data_Int.toNumber($113));
+var coarbInt = new Coarbitrary(function ($123) {
+    return Test_QuickCheck_Gen.perturbGen(Data_Int.toNumber($123));
 });
 var coarbIdentity = function (dictCoarbitrary) {
     return new Coarbitrary(function (v) {
@@ -185,7 +191,7 @@ var coarbEither = function (dictCoarbitrary) {
             if (v instanceof Data_Either.Right) {
                 return coarbitrary(dictCoarbitrary1)(v.value0);
             };
-            throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 136, column 1 - line 136, column 83: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 158, column 1 - line 158, column 83: " + [ v.constructor.name ]);
         });
     };
 };
@@ -199,19 +205,27 @@ var coarbBoolean = new Coarbitrary(function (v) {
     if (!v) {
         return Test_QuickCheck_Gen.perturbGen(2.0);
     };
-    throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 64, column 1 - line 64, column 45: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Test.QuickCheck.Arbitrary line 68, column 1 - line 68, column 45: " + [ v.constructor.name ]);
 });
 var coarbArray = function (dictCoarbitrary) {
     return new Coarbitrary(Data_Foldable.foldl(Data_Foldable.foldableArray)(function (f) {
         return function (x) {
-            return function ($114) {
-                return f(coarbitrary(dictCoarbitrary)(x)($114));
+            return function ($124) {
+                return f(coarbitrary(dictCoarbitrary)(x)($124));
             };
         };
     })(Control_Category.id(Control_Category.categoryFn)));
 };
+var coarbNonEmptyArray = function (dictCoarbitrary) {
+    return new Coarbitrary(function ($125) {
+        return coarbitrary(coarbArray(dictCoarbitrary))(Data_Array_NonEmpty.toArray($125));
+    });
+};
 var coarbString = new Coarbitrary(function (s) {
     return coarbitrary(coarbArray(coarbMaybe(coarbInt)))(Data_Functor.map(Data_Functor.functorArray)(Data_String.charCodeAt(0))(Data_String.split(Data_Newtype.wrap(Data_String.newtypePattern)(""))(s)));
+});
+var coarbNonEmptyString = new Coarbitrary(function ($126) {
+    return coarbitrary(coarbString)(Data_String_NonEmpty.toString($126));
 });
 var arbitraryRowListNil = new ArbitraryRowList(function (v) {
     return Control_Applicative.pure(Test_QuickCheck_Gen.applicativeGen)({});
@@ -244,8 +258,8 @@ var arbitraryIdentity = function (dictArbitrary) {
     return new Arbitrary(Data_Functor.map(Test_QuickCheck_Gen.functorGen)(Data_Identity.Identity)(arbitrary(dictArbitrary)));
 };
 var arbitraryLazy = function (dictArbitrary) {
-    return new Arbitrary(Control_Bind.bind(Test_QuickCheck_Gen.bindGen)(arbitrary(dictArbitrary))(function ($115) {
-        return Control_Applicative.pure(Test_QuickCheck_Gen.applicativeGen)(Data_Lazy.defer(Data_Function["const"]($115)));
+    return new Arbitrary(Control_Bind.bind(Test_QuickCheck_Gen.bindGen)(arbitrary(dictArbitrary))(function ($127) {
+        return Control_Applicative.pure(Test_QuickCheck_Gen.applicativeGen)(Data_Lazy.defer(Data_Function["const"]($127)));
     }));
 };
 var arbitraryList = function (dictArbitrary) {
@@ -335,7 +349,19 @@ var arbBoolean = new Arbitrary(Control_Monad_Gen_Class.chooseBool(Test_QuickChec
 var arbArray = function (dictArbitrary) {
     return new Arbitrary(Test_QuickCheck_Gen.arrayOf(arbitrary(dictArbitrary)));
 };
+var arbNonEmptyArray = function (dictArbitrary) {
+    return new Arbitrary(Control_Bind.bind(Test_QuickCheck_Gen.bindGen)(arbitrary(dictArbitrary))(function (v) {
+        return Control_Bind.bind(Test_QuickCheck_Gen.bindGen)(arbitrary(arbArray(dictArbitrary)))(function (v1) {
+            return Control_Applicative.pure(Test_QuickCheck_Gen.applicativeGen)(Data_Maybe.fromJust()(Data_Array_NonEmpty.fromArray(Control_Monad_ST.pureST(function __do() {
+                var v2 = Data_Array_ST.unsafeThaw(v1)();
+                var v3 = Data_Array_ST.pushSTArray(v2)(v)();
+                return Data_Array_ST.unsafeFreeze(v2)();
+            }))));
+        });
+    }));
+};
 var arbString = new Arbitrary(Data_Functor.map(Test_QuickCheck_Gen.functorGen)(Data_String.fromCharArray)(arbitrary(arbArray(arbChar))));
+var arbNonEmptyString = new Arbitrary(Control_Apply.apply(Test_QuickCheck_Gen.applyGen)(Data_Functor.map(Test_QuickCheck_Gen.functorGen)(Data_String_NonEmpty.cons)(arbitrary(arbChar)))(arbitrary(arbString)));
 var coarbFunction = function (dictArbitrary) {
     return function (dictCoarbitrary) {
         return new Coarbitrary(function (f) {
@@ -366,6 +392,8 @@ module.exports = {
     coarbInt: coarbInt,
     arbString: arbString,
     coarbString: coarbString,
+    arbNonEmptyString: arbNonEmptyString,
+    coarbNonEmptyString: coarbNonEmptyString,
     arbChar: arbChar,
     coarbChar: coarbChar,
     arbUnit: arbUnit,
@@ -374,6 +402,8 @@ module.exports = {
     coarbOrdering: coarbOrdering,
     arbArray: arbArray,
     coarbArray: coarbArray,
+    arbNonEmptyArray: arbNonEmptyArray,
+    coarbNonEmptyArray: coarbNonEmptyArray,
     arbFunction: arbFunction,
     coarbFunction: coarbFunction,
     arbTuple: arbTuple,

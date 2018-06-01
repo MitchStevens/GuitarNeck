@@ -54,7 +54,7 @@ var withHelp = function (v) {
         if (!v) {
             return new Failed(v1);
         };
-        throw new Error("Failed pattern match at Test.QuickCheck line 166, column 1 - line 166, column 40: " + [ v.constructor.name, v1.constructor.name ]);
+        throw new Error("Failed pattern match at Test.QuickCheck line 193, column 1 - line 193, column 40: " + [ v.constructor.name, v1.constructor.name ]);
     };
 };
 var testableResult = new Testable(Control_Applicative.pure(Test_QuickCheck_Gen.applicativeGen));
@@ -65,7 +65,7 @@ var testableBoolean = new Testable(function (v) {
     if (!v) {
         return Control_Applicative.pure(Test_QuickCheck_Gen.applicativeGen)(new Failed("Test returned false"));
     };
-    throw new Error("Failed pattern match at Test.QuickCheck line 142, column 1 - line 142, column 45: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Test.QuickCheck line 169, column 1 - line 169, column 45: " + [ v.constructor.name ]);
 });
 var test = function (dict) {
     return dict.test;
@@ -73,8 +73,8 @@ var test = function (dict) {
 var testableFunction = function (dictArbitrary) {
     return function (dictTestable) {
         return new Testable(function (f) {
-            return Control_Bind.bind(Test_QuickCheck_Gen.bindGen)(Test_QuickCheck_Arbitrary.arbitrary(dictArbitrary))(function ($50) {
-                return test(dictTestable)(f($50));
+            return Control_Bind.bind(Test_QuickCheck_Gen.bindGen)(Test_QuickCheck_Arbitrary.arbitrary(dictArbitrary))(function ($54) {
+                return test(dictTestable)(f($54));
             });
         });
     };
@@ -89,7 +89,7 @@ var showResult = new Data_Show.Show(function (v) {
     if (v instanceof Failed) {
         return "Failed: " + v.value0;
     };
-    throw new Error("Failed pattern match at Test.QuickCheck line 155, column 1 - line 155, column 35: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Test.QuickCheck line 182, column 1 - line 182, column 35: " + [ v.constructor.name ]);
 });
 var quickCheckWithSeed = function (dictTestable) {
     return function (initialSeed) {
@@ -124,9 +124,9 @@ var quickCheckWithSeed = function (dictTestable) {
                                 }))
                             });
                         };
-                        throw new Error("Failed pattern match at Test.QuickCheck line 99, column 9 - line 114, column 16: " + [ v1.constructor.name ]);
+                        throw new Error("Failed pattern match at Test.QuickCheck line 118, column 9 - line 133, column 16: " + [ v1.constructor.name ]);
                     };
-                    throw new Error("Failed pattern match at Test.QuickCheck line 95, column 3 - line 95, column 48: " + [ v.constructor.name ]);
+                    throw new Error("Failed pattern match at Test.QuickCheck line 114, column 3 - line 114, column 48: " + [ v.constructor.name ]);
                 };
                 var result = Control_Monad_Rec_Class.tailRec(loop)({
                     seed: initialSeed,
@@ -156,6 +156,12 @@ var quickCheckPure = function (dictTestable) {
         };
     };
 };
+var quickCheckGenWithSeed = function (dictTestable) {
+    return quickCheckWithSeed(testableGen(dictTestable));
+};
+var quickCheckGenPure = function (dictTestable) {
+    return quickCheckPure(testableGen(dictTestable));
+};
 var quickCheck$prime = function (dictTestable) {
     return function (n) {
         return function (prop) {
@@ -166,10 +172,16 @@ var quickCheck$prime = function (dictTestable) {
         };
     };
 };
+var quickCheckGen$prime = function (dictTestable) {
+    return quickCheck$prime(testableGen(dictTestable));
+};
 var quickCheck = function (dictTestable) {
     return function (prop) {
         return quickCheck$prime(dictTestable)(100)(prop);
     };
+};
+var quickCheckGen = function (dictTestable) {
+    return quickCheck(testableGen(dictTestable));
 };
 var assertOp = function (dictEq) {
     return function (dictShow) {
@@ -216,9 +228,13 @@ var assertEquals = function (dictEq) {
 };
 module.exports = {
     quickCheck: quickCheck,
+    quickCheckGen: quickCheckGen,
     "quickCheck'": quickCheck$prime,
+    "quickCheckGen'": quickCheckGen$prime,
     quickCheckWithSeed: quickCheckWithSeed,
+    quickCheckGenWithSeed: quickCheckGenWithSeed,
     quickCheckPure: quickCheckPure,
+    quickCheckGenPure: quickCheckGenPure,
     Testable: Testable,
     test: test,
     Success: Success,

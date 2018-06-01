@@ -21,12 +21,12 @@
     "purescript-monoid": "^3.0.0",
     "purescript-tuples": "^4.0.0"
   },
-  "version": "3.2.0",
-  "_release": "3.2.0",
+  "version": "3.3.0",
+  "_release": "3.3.0",
   "_resolution": {
     "type": "version",
-    "tag": "v3.2.0",
-    "commit": "50dbff3513a627ad4948d6afbc83eb7b39fa895f"
+    "tag": "v3.3.0",
+    "commit": "ebd70decd9e57032c11f9c4ef202ae05de971493"
   },
   "_source": "https://github.com/mankyKitty/purescript-contravariant.git",
   "_target": "^3.0.0",

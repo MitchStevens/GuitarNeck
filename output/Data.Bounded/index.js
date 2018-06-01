@@ -18,6 +18,9 @@ var boundedUnit = new Bounded(function () {
 var boundedOrdering = new Bounded(function () {
     return Data_Ord.ordOrdering;
 }, Data_Ordering.LT.value, Data_Ordering.GT.value);
+var boundedNumber = new Bounded(function () {
+    return Data_Ord.ordNumber;
+}, $foreign.bottomNumber, $foreign.topNumber);
 var boundedInt = new Bounded(function () {
     return Data_Ord.ordInt;
 }, $foreign.bottomInt, $foreign.topInt);
@@ -38,5 +41,6 @@ module.exports = {
     boundedInt: boundedInt,
     boundedChar: boundedChar,
     boundedOrdering: boundedOrdering,
-    boundedUnit: boundedUnit
+    boundedUnit: boundedUnit,
+    boundedNumber: boundedNumber
 };

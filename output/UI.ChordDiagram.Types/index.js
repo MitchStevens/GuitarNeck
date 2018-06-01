@@ -12,6 +12,11 @@ var Redraw = (function () {
     };
     return Redraw;
 })();
+var default_dimensions = {
+    width: 150.0,
+    height: 150.0
+};
 module.exports = {
-    Redraw: Redraw
+    Redraw: Redraw,
+    default_dimensions: default_dimensions
 };

@@ -3,25 +3,33 @@
 var Control_Category = require("../Control.Category");
 var Control_Semigroupoid = require("../Control.Semigroupoid");
 var Data_Functor_Contravariant = require("../Data.Functor.Contravariant");
+var Data_Monoid = require("../Data.Monoid");
 var Data_Newtype = require("../Data.Newtype");
+var Data_Semigroup = require("../Data.Semigroup");
 var Prelude = require("../Prelude");
 var Op = function (x) {
     return x;
 };
 var semigroupoidOp = new Control_Semigroupoid.Semigroupoid(function (v) {
     return function (v1) {
-        return function ($10) {
-            return v1(v($10));
+        return function ($12) {
+            return v1(v($12));
         };
     };
 });
+var semigroupOp = function (dictSemigroup) {
+    return Data_Semigroup.semigroupFn(dictSemigroup);
+};
 var newtypeOp = new Data_Newtype.Newtype(function (n) {
     return n;
 }, Op);
+var monoidOp = function (dictMonoid) {
+    return Data_Monoid.monoidFn(dictMonoid);
+};
 var contravariantOp = new Data_Functor_Contravariant.Contravariant(function (f) {
     return function (v) {
-        return function ($11) {
-            return v(f($11));
+        return function ($13) {
+            return v(f($13));
         };
     };
 });
@@ -31,6 +39,8 @@ var categoryOp = new Control_Category.Category(function () {
 module.exports = {
     Op: Op,
     newtypeOp: newtypeOp,
+    semigroupOp: semigroupOp,
+    monoidOp: monoidOp,
     semigroupoidOp: semigroupoidOp,
     categoryOp: categoryOp,
     contravariantOp: contravariantOp

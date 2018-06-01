@@ -44,8 +44,7 @@ chord_input =
   render :: State -> H.ComponentHTML Query
   render state = 
     HH.div_
-      [ HH.input
-        [ HE.onValueInput $ HE.input StringInput ]
+      [ HH.input [ HE.onValueInput $ HE.input StringInput ]
       , either display_error display_chord state
       ]
   

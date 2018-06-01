@@ -32,12 +32,12 @@
   "devDependencies": {
     "purescript-console": "^3.0.0"
   },
-  "version": "3.5.0",
-  "_release": "3.5.0",
+  "version": "3.6.0",
+  "_release": "3.6.0",
   "_resolution": {
     "type": "version",
-    "tag": "v3.5.0",
-    "commit": "ee131c43402ea29eefb6ae1bd38be32144aab023"
+    "tag": "v3.6.0",
+    "commit": "cea6d909762e922dc88228c6078b1c10b384e387"
   },
   "_source": "https://github.com/purescript/purescript-transformers.git",
   "_target": "^3.0.0",

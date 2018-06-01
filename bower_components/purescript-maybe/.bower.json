@@ -20,12 +20,12 @@
     "purescript-monoid": "^3.0.0",
     "purescript-prelude": "^3.0.0"
   },
-  "version": "3.0.0",
-  "_release": "3.0.0",
+  "version": "3.1.0",
+  "_release": "3.1.0",
   "_resolution": {
     "type": "version",
-    "tag": "v3.0.0",
-    "commit": "435566d37188a574276b9b98737bfcb4d5b89a9f"
+    "tag": "v3.1.0",
+    "commit": "b7c9ca945ebc76e6048a80ce4a3ea26d4f229768"
   },
   "_source": "https://github.com/purescript/purescript-maybe.git",
   "_target": "^3.0.0",

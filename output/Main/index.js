@@ -7,12 +7,8 @@ var Control_Monad_Eff = require("../Control.Monad.Eff");
 var Control_Monad_Eff_Class = require("../Control.Monad.Eff.Class");
 var Control_Monad_Eff_Exception = require("../Control.Monad.Eff.Exception");
 var Control_Monad_Error_Class = require("../Control.Monad.Error.Class");
-var DOM = require("../DOM");
-var DOM_HTML = require("../DOM.HTML");
 var DOM_HTML_HTMLElement = require("../DOM.HTML.HTMLElement");
-var DOM_HTML_Location = require("../DOM.HTML.Location");
 var DOM_HTML_Types = require("../DOM.HTML.Types");
-var DOM_HTML_Window = require("../DOM.HTML.Window");
 var DOM_Node_ParentNode = require("../DOM.Node.ParentNode");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
@@ -30,14 +26,11 @@ var Halogen_Aff = require("../Halogen.Aff");
 var Halogen_Aff_Util = require("../Halogen.Aff.Util");
 var Halogen_VDom_Driver = require("../Halogen.VDom.Driver");
 var NeckData = require("../NeckData");
-var Network_HTTP_Affjax = require("../Network.HTTP.Affjax");
-var Node_FS = require("../Node.FS");
 var Prelude = require("../Prelude");
 var Reader = require("../Reader");
-var UI_ChordDiagram = require("../UI.ChordDiagram");
 var UI_FFTypes = require("../UI.FFTypes");
 var UI_GuitarComponent = require("../UI.GuitarComponent");
-var UI_Queue = require("../UI.Queue");
+var UI_GuitarNeck = require("../UI.GuitarNeck");
 var selector = "#content #guitar-component";
 var default_neck_data = {
     x_offset: 0.0,
@@ -64,20 +57,6 @@ var await_guitar = Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_
     });
 });
 var main = (function () {
-    var input = {
-        limit: 5,
-        component: UI_ChordDiagram.chord_diagram
-    };
-    var dims = {
-        width: 150.0,
-        height: 150.0
-    };
-    var cons = function (chord) {
-        return new UI_Queue.Cons({
-            fingering: chord,
-            dimensions: dims
-        }, Data_Unit.unit);
-    };
     var cmaj = {
         e4: new Data_Maybe.Just(3),
         b3: new Data_Maybe.Just(5),
@@ -96,12 +75,8 @@ var main = (function () {
     };
     return Data_Functor["void"](Control_Monad_Eff.functorEff)(Halogen_Aff_Util.runHalogenAff(Control_Bind.bind(Control_Monad_Aff.bindAff)(await_guitar)(function (v) {
         return Control_Bind.bind(Control_Monad_Aff.bindAff)(Control_Monad_Eff_Class.liftEff(Control_Monad_Aff.monadEffAff)(calc_neck_data(v)))(function (v1) {
-            return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_Queue.ui_queue)(input)(v))(function (v2) {
-                return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(v2.query(cons(cmaj)))(function () {
-                    return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Aff.bindAff)(v2.query(cons(amin)))(function () {
-                        return Control_Applicative.pure(Control_Monad_Aff.applicativeAff)(Data_Unit.unit);
-                    });
-                });
+            return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_VDom_Driver.runUI(UI_GuitarNeck.guitar_neck)(v1)(v))(function (v2) {
+                return Control_Applicative.pure(Control_Monad_Aff.applicativeAff)(Data_Unit.unit);
             });
         });
     })));

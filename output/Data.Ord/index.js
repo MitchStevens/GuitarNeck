@@ -2,7 +2,6 @@
 "use strict";
 var $foreign = require("./foreign");
 var Data_Eq = require("../Data.Eq");
-var Data_Function = require("../Data.Function");
 var Data_Ord_Unsafe = require("../Data.Ord.Unsafe");
 var Data_Ordering = require("../Data.Ordering");
 var Data_Ring = require("../Data.Ring");
@@ -59,7 +58,7 @@ var ordOrdering = new Ord(function () {
         if (v instanceof Data_Ordering.GT) {
             return Data_Ordering.GT.value;
         };
-        throw new Error("Failed pattern match at Data.Ord line 68, column 1 - line 68, column 37: " + [ v.constructor.name, v1.constructor.name ]);
+        throw new Error("Failed pattern match at Data.Ord line 67, column 1 - line 67, column 37: " + [ v.constructor.name, v1.constructor.name ]);
     };
 });
 var ordNumber = new Ord(function () {
@@ -82,7 +81,11 @@ var compare = function (dict) {
 };
 var comparing = function (dictOrd) {
     return function (f) {
-        return Data_Function.on(compare(dictOrd))(f);
+        return function (x) {
+            return function (y) {
+                return compare(dictOrd)(f(x))(f(y));
+            };
+        };
     };
 };
 var greaterThan = function (dictOrd) {
@@ -153,7 +156,7 @@ var max = function (dictOrd) {
             if (v instanceof Data_Ordering.GT) {
                 return x;
             };
-            throw new Error("Failed pattern match at Data.Ord line 123, column 3 - line 126, column 12: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Data.Ord line 122, column 3 - line 125, column 12: " + [ v.constructor.name ]);
         };
     };
 };
@@ -170,7 +173,7 @@ var min = function (dictOrd) {
             if (v instanceof Data_Ordering.GT) {
                 return y;
             };
-            throw new Error("Failed pattern match at Data.Ord line 114, column 3 - line 117, column 12: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Data.Ord line 113, column 3 - line 116, column 12: " + [ v.constructor.name ]);
         };
     };
 };
@@ -190,7 +193,7 @@ var ordArray = function (dictOrd) {
                 if (v instanceof Data_Ordering.GT) {
                     return -1 | 0;
                 };
-                throw new Error("Failed pattern match at Data.Ord line 61, column 7 - line 66, column 1: " + [ v.constructor.name ]);
+                throw new Error("Failed pattern match at Data.Ord line 60, column 7 - line 65, column 1: " + [ v.constructor.name ]);
             };
         };
         return function (xs) {

@@ -1,15 +1,6 @@
 module Main where
 
 import Control.Monad.Aff
-import Control.Monad.Eff.Class
-import Control.Monad.Eff (Eff)
-
-import DOM.HTML
-import DOM.HTML.HTMLElement
-import DOM.HTML.Location
-import DOM.HTML.Types
-import DOM.HTML.Window
-
 import Data.Maybe
 import Data.Tuple
 import Debug.Trace
@@ -18,19 +9,18 @@ import Fret
 import Graphics.Canvas
 import Halogen.Aff.Util
 import NeckData
-import Network.HTTP.Affjax
-import Node.FS
 import Prelude
 import Reader
 
-import UI.ChordDiagram
 import UI.FFTypes
 import UI.GuitarComponent
-import UI.Queue (Query(..), ui_queue)
+import UI.GuitarNeck (guitar_neck)
 
-import DOM (DOM)
+import Control.Monad.Eff (Eff)
+import DOM.HTML.HTMLElement (offsetWidth)
+import DOM.HTML.Types (HTMLElement)
 import DOM.Node.ParentNode (QuerySelector(..), querySelector)
-import Halogen (action)
+import Halogen (action, liftEff)
 import Halogen as H
 import Halogen.Aff (awaitLoad)
 import Halogen.Aff as HA
@@ -51,15 +41,10 @@ main :: forall e. EffM e Unit
 main = void $ HA.runHalogenAff do
   element <- await_guitar
   neck_data <- liftEff $ calc_neck_data element
-  io <- runUI ui_queue input element
-  io.query (cons cmaj)
-  io.query (cons amin)
-  pure unit
   --io <- runUI guitar_component neck_data element
+  io <- runUI guitar_neck neck_data element
+  pure unit
   where
-    input =
-      { limit: 5
-      , component: chord_diagram }
 
     cmaj = Fingering
       { e4: Just (Fret 3)
@@ -77,9 +62,6 @@ main = void $ HA.runHalogenAff do
       , a2: Just (Fret 0)
       , e2: Nothing }
 
-    dims = {width: 150.0, height: 150.0}
-    cons chord = Cons {fingering: chord, dimensions: dims} unit
-
 await_guitar :: forall e. AffM e HTMLElement
 await_guitar = do
   awaitLoad
@@ -88,7 +70,7 @@ await_guitar = do
 
 calc_neck_data :: forall e. HTMLElement -> EffM e NeckData
 calc_neck_data element = do
-  width  <- offsetWidth  element
+  width  <- offsetWidth element
   pure $ 
     { x_offset: 20.0
     , y_offset: 20.0

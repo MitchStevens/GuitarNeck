@@ -36,6 +36,6 @@
     "commit": "0991c8657d2b997e6ebc279d7f291880aaffa6ca"
   },
   "_source": "https://github.com/paf31/purescript-tailrec.git",
-  "_target": "^3.3.0",
+  "_target": "^3.0.0",
   "_originalSource": "purescript-tailrec"
 }

@@ -86,7 +86,7 @@ var chord_input = (function () {
                 return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value0(v1));
             });
         };
-        throw new Error("Failed pattern match at UI.ChordInput line 53, column 10 - line 61, column 21: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at UI.ChordInput line 52, column 10 - line 60, column 21: " + [ v.constructor.name ]);
     };
     return Halogen_Component.component(Halogen_HTML_Core.bifunctorHTML)({
         initialState: Data_Function["const"](initialState),

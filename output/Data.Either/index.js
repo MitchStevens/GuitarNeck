@@ -6,6 +6,7 @@ var Control_Apply = require("../Control.Apply");
 var Control_Bind = require("../Control.Bind");
 var Control_Extend = require("../Control.Extend");
 var Control_Monad = require("../Control.Monad");
+var Control_Semigroupoid = require("../Control.Semigroupoid");
 var Data_Bifoldable = require("../Data.Bifoldable");
 var Data_Bifunctor = require("../Data.Bifunctor");
 var Data_Bitraversable = require("../Data.Bitraversable");
@@ -54,6 +55,11 @@ var showEither = function (dictShow) {
             throw new Error("Failed pattern match at Data.Either line 160, column 1 - line 160, column 61: " + [ v.constructor.name ]);
         });
     };
+};
+var note$prime = function (f) {
+    return Data_Maybe["maybe'"](function ($171) {
+        return Left.create(f($171));
+    })(Right.create);
 };
 var note = function (a) {
     return Data_Maybe.maybe(new Left(a))(Right.create);
@@ -409,6 +415,7 @@ module.exports = {
     fromLeft: fromLeft,
     fromRight: fromRight,
     note: note,
+    "note'": note$prime,
     hush: hush,
     functorEither: functorEither,
     invariantEither: invariantEither,

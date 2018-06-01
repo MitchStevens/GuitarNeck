@@ -24,12 +24,12 @@
     "purescript-assert": "^3.0.0",
     "purescript-console": "^3.0.0"
   },
-  "version": "3.1.0",
-  "_release": "3.1.0",
+  "version": "3.2.0",
+  "_release": "3.2.0",
   "_resolution": {
     "type": "version",
-    "tag": "v3.1.0",
-    "commit": "101ce1ce2b22beda229bbacfc0ef30279909287d"
+    "tag": "v3.2.0",
+    "commit": "91297eda139c04625cf3f23cb259e2958d555732"
   },
   "_source": "https://github.com/paf31/purescript-unfoldable.git",
   "_target": "^3.0.0",

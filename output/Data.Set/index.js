@@ -47,8 +47,8 @@ var toList = function (v) {
     return Data_Map.keys(v.value0);
 };
 var toUnfoldable = function (dictUnfoldable) {
-    return function ($70) {
-        return Data_List.toUnfoldable(dictUnfoldable)(toList($70));
+    return function ($71) {
+        return Data_List.toUnfoldable(dictUnfoldable)(toList($71));
     };
 };
 var size = function (v) {
@@ -84,20 +84,20 @@ var insert = function (dictOrd) {
 };
 var foldableSet = new Data_Foldable.Foldable(function (dictMonoid) {
     return function (f) {
-        return function ($71) {
-            return Data_Foldable.foldMap(Data_List_Types.foldableList)(dictMonoid)(f)(toList($71));
-        };
-    };
-}, function (f) {
-    return function (x) {
         return function ($72) {
-            return Data_Foldable.foldl(Data_List_Types.foldableList)(f)(x)(toList($72));
+            return Data_Foldable.foldMap(Data_List_Types.foldableList)(dictMonoid)(f)(toList($72));
         };
     };
 }, function (f) {
     return function (x) {
         return function ($73) {
-            return Data_Foldable.foldr(Data_List_Types.foldableList)(f)(x)(toList($73));
+            return Data_Foldable.foldl(Data_List_Types.foldableList)(f)(x)(toList($73));
+        };
+    };
+}, function (f) {
+    return function (x) {
+        return function ($74) {
+            return Data_Foldable.foldr(Data_List_Types.foldableList)(f)(x)(toList($74));
         };
     };
 });
@@ -130,6 +130,11 @@ var ordSet = function (dictOrd) {
 var eq1Set = new Data_Eq.Eq1(function (dictEq) {
     return Data_Eq.eq(eqSet(dictEq));
 });
+var ord1Set = new Data_Ord.Ord1(function () {
+    return eq1Set;
+}, function (dictOrd) {
+    return Data_Ord.compare(ordSet(dictOrd));
+});
 var empty = new $$Set(Data_Map.empty);
 var fromFoldable = function (dictFoldable) {
     return function (dictOrd) {
@@ -143,8 +148,8 @@ var fromFoldable = function (dictFoldable) {
 var intersection = function (dictOrd) {
     return function (s1) {
         return function (s2) {
-            var toArray = function ($74) {
-                return Data_Array.fromFoldable(Data_List_Types.foldableList)(toList($74));
+            var toArray = function ($75) {
+                return Data_Array.fromFoldable(Data_List_Types.foldableList)(toList($75));
             };
             var rs = toArray(s2);
             var rl = Data_Array.length(rs);
@@ -153,8 +158,8 @@ var intersection = function (dictOrd) {
             var intersect = function (acc) {
                 var go = function (l) {
                     return function (r) {
-                        var $63 = l < ll && r < rl;
-                        if ($63) {
+                        var $64 = l < ll && r < rl;
+                        if ($64) {
                             var v = Data_Ord.compare(dictOrd)(ls[l])(rs[r]);
                             if (v instanceof Data_Ordering.EQ) {
                                 return function __do() {
@@ -177,7 +182,7 @@ var intersection = function (dictOrd) {
                                     b: r + 1 | 0
                                 }));
                             };
-                            throw new Error("Failed pattern match at Data.Set line 172, column 12 - line 177, column 43: " + [ v.constructor.name ]);
+                            throw new Error("Failed pattern match at Data.Set line 176, column 12 - line 181, column 43: " + [ v.constructor.name ]);
                         };
                         return Control_Applicative.pure(Control_Monad_Eff.applicativeEff)(new Control_Monad_Rec_Class.Done(acc));
                     };
@@ -262,6 +267,7 @@ module.exports = {
     eq1Set: eq1Set,
     showSet: showSet,
     ordSet: ordSet,
+    ord1Set: ord1Set,
     monoidSet: monoidSet,
     semigroupSet: semigroupSet,
     foldableSet: foldableSet

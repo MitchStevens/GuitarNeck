@@ -34,6 +34,6 @@
     "commit": "d093f3bbe7dc102ffb3978fde367931d2d1ecc19"
   },
   "_source": "https://github.com/paf31/purescript-profunctor-lenses.git",
-  "_target": "^3.7.0",
+  "_target": "^3.8.0",
   "_originalSource": "purescript-profunctor-lenses"
 }

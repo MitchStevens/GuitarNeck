@@ -153,6 +153,7 @@ var htmlBaseElementToHTMLElement = Unsafe_Coerce.unsafeCoerce;
 var htmlBRElementToHTMLElement = Unsafe_Coerce.unsafeCoerce;
 var htmlAudioElementToHTMLMediaElement = Unsafe_Coerce.unsafeCoerce;
 var htmlAreaElementToHTMLElement = Unsafe_Coerce.unsafeCoerce;
+var htmlAnchorElementToHTMLHyperlinkElementUtils = Unsafe_Coerce.unsafeCoerce;
 var htmlAnchorElementToHTMLElement = Unsafe_Coerce.unsafeCoerce;
 module.exports = {
     windowToEventTarget: windowToEventTarget,
@@ -206,6 +207,7 @@ module.exports = {
     readHTMLDivElement: readHTMLDivElement,
     htmlAnchorElementToHTMLElement: htmlAnchorElementToHTMLElement,
     readHTMLAnchorElement: readHTMLAnchorElement,
+    htmlAnchorElementToHTMLHyperlinkElementUtils: htmlAnchorElementToHTMLHyperlinkElementUtils,
     htmlDataElementToHTMLElement: htmlDataElementToHTMLElement,
     readHTMLDataElement: readHTMLDataElement,
     htmlTimeElementToHTMLElement: htmlTimeElementToHTMLElement,

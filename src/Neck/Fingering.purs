@@ -56,6 +56,9 @@ shift_fingering n fingering =
 to_array :: ChordF ~> Array
 to_array (Fingering c) = [c.e4, c.b3, c.g3, c.d3, c.a2, c.e2]
 
+is_open :: Fingering -> Boolean
+is_open = any (eq 0.0 <<< fst) <<< to_points
+
 fret_interval :: Fingering -> Interval Fret
 fret_interval fingering = foldl join bottom frets
   where frets = map singleton $ catMaybes (to_array fingering)

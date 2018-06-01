@@ -65,6 +65,11 @@ var semigroupMaybe = function (dictSemigroup) {
         };
     });
 };
+var optional = function (dictAlternative) {
+    return function (a) {
+        return Control_Alt.alt((dictAlternative.Plus1()).Alt0())(Data_Functor.map(((dictAlternative.Plus1()).Alt0()).Functor0())(Just.create)(a))(Control_Applicative.pure(dictAlternative.Applicative0())(Nothing.value));
+    };
+};
 var monoidMaybe = function (dictSemigroup) {
     return new Data_Monoid.Monoid(function () {
         return semigroupMaybe(dictSemigroup);
@@ -116,8 +121,8 @@ var fromMaybe = function (a) {
 var fromJust = function (dictPartial) {
     return function (v) {
         var __unused = function (dictPartial1) {
-            return function ($dollar34) {
-                return $dollar34;
+            return function ($dollar35) {
+                return $dollar35;
             };
         };
         return __unused(dictPartial)((function () {
@@ -252,6 +257,7 @@ module.exports = {
     isJust: isJust,
     isNothing: isNothing,
     fromJust: fromJust,
+    optional: optional,
     functorMaybe: functorMaybe,
     applyMaybe: applyMaybe,
     applicativeMaybe: applicativeMaybe,

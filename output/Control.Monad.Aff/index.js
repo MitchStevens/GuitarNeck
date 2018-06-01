@@ -6,6 +6,7 @@ var Control_Alternative = require("../Control.Alternative");
 var Control_Applicative = require("../Control.Applicative");
 var Control_Apply = require("../Control.Apply");
 var Control_Bind = require("../Control.Bind");
+var Control_Lazy = require("../Control.Lazy");
 var Control_Monad = require("../Control.Monad");
 var Control_Monad_Eff = require("../Control.Monad.Eff");
 var Control_Monad_Eff_Class = require("../Control.Monad.Eff.Class");
@@ -54,7 +55,7 @@ var ffiUtil = (function () {
         if (v instanceof Data_Either.Left) {
             return Partial_Unsafe.unsafeCrashWith("unsafeFromRight: Left");
         };
-        throw new Error("Failed pattern match at Control.Monad.Aff line 398, column 21 - line 400, column 31: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Control.Monad.Aff line 402, column 21 - line 404, column 31: " + [ v.constructor.name ]);
     };
     var unsafeFromLeft = function (v) {
         if (v instanceof Data_Either.Left) {
@@ -63,7 +64,7 @@ var ffiUtil = (function () {
         if (v instanceof Data_Either.Right) {
             return Partial_Unsafe.unsafeCrashWith("unsafeFromLeft: Right");
         };
-        throw new Error("Failed pattern match at Control.Monad.Aff line 393, column 20 - line 397, column 3: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Control.Monad.Aff line 397, column 20 - line 401, column 3: " + [ v.constructor.name ]);
     };
     var isLeft = function (v) {
         if (v instanceof Data_Either.Left) {
@@ -72,7 +73,7 @@ var ffiUtil = (function () {
         if (v instanceof Data_Either.Right) {
             return false;
         };
-        throw new Error("Failed pattern match at Control.Monad.Aff line 388, column 12 - line 390, column 20: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Control.Monad.Aff line 392, column 12 - line 394, column 20: " + [ v.constructor.name ]);
     };
     return {
         isLeft: isLeft,
@@ -149,6 +150,9 @@ var $$finally = function (fin) {
 var invincible = function (a) {
     return bracket(a)(Data_Function["const"](Control_Applicative.pure(applicativeAff)(Data_Unit.unit)))(Control_Applicative.pure(applicativeAff));
 };
+var lazyAff = new Control_Lazy.Lazy(function (f) {
+    return Control_Bind.bind(bindAff)(Control_Applicative.pure(applicativeAff)(Data_Unit.unit))(f);
+});
 var semigroupAff = function (dictSemigroup) {
     return new Data_Semigroup.Semigroup(Control_Apply.lift2(applyAff)(Data_Semigroup.append(dictSemigroup)));
 };
@@ -282,7 +286,7 @@ var monadRecAff = new Control_Monad_Rec_Class.MonadRec(function () {
             if (v instanceof Control_Monad_Rec_Class.Loop) {
                 return go(v.value0);
             };
-            throw new Error("Failed pattern match at Control.Monad.Aff line 100, column 7 - line 102, column 22: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Control.Monad.Aff line 101, column 7 - line 103, column 22: " + [ v.constructor.name ]);
         });
     };
     return go;
@@ -360,6 +364,7 @@ module.exports = {
     monadThrowAff: monadThrowAff,
     monadErrorAff: monadErrorAff,
     monadEffAff: monadEffAff,
+    lazyAff: lazyAff,
     functorParAff: functorParAff,
     applyParAff: applyParAff,
     applicativeParAff: applicativeParAff,

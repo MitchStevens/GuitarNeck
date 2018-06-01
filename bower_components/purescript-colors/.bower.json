@@ -1,0 +1,37 @@
+{
+  "name": "purescript-colors",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sharkdp/purescript-colors.git"
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "html",
+    "output",
+    "test"
+  ],
+  "dependencies": {
+    "purescript-arrays": "^4.0.0",
+    "purescript-integers": "^3.0.0",
+    "purescript-lists": "^4.0.0",
+    "purescript-partial": "^1.0.0",
+    "purescript-strings": "^3.0.0"
+  },
+  "devDependencies": {
+    "purescript-test-unit": "^11.0.0",
+    "purescript-psci-support": "^3.0.0"
+  },
+  "homepage": "https://github.com/sharkdp/purescript-colors",
+  "version": "4.3.0",
+  "_release": "4.3.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v4.3.0",
+    "commit": "6822c3754a1311a822ccf67facd24c0effd2e046"
+  },
+  "_source": "https://github.com/sharkdp/purescript-colors.git",
+  "_target": "3.x - 4.x",
+  "_originalSource": "purescript-colors"
+}
